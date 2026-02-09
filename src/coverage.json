@@ -1,67 +1,50 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T15:13:11.198Z",
+  "generatedAt": "2026-02-09T16:23:26.494Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the Mantra Number dropdown so it can populate as soon as mantra numbers are fetched, even when the Veda dropdown has not been manually selected yet. Ensure the app defaults to Samaveda on first load (when there is no deep link) so the user can immediately see available mantras (including 47 and 48).",
+        "summary": "Ensure that when a user selects Samaveda Mantra 48 from the mantra dropdown, the app renders the mantra content section (metadata, text, and meaning) instead of showing an empty/no-content state.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
           "frontend/src/App.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
           "frontend/src/App.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Improve troubleshooting visibility when the mantra numbers query fails or returns empty: show a clear inline state for the Mantra Number dropdown area for (a) loading, (b) error, and (c) empty results. Error text must be user-facing English and include an actionable suggestion to refresh/reload.",
+        "summary": "If a selected mantra has no stored mantra text/meaning/metadata (all are null) but a saved template exists for that Veda + mantra number, display the saved template content in a read-only preview area within the mantra content section.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/components/MantraTemplatePreview.tsx",
           "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Add a lightweight backend diagnostics query method that returns basic backend state needed to confirm the frontend is talking to the expected deployed canister (e.g., counts of mantras/metadata entries and whether Samaveda 47 and 48 exist). Expose this information in the frontend in a small, non-intrusive “Diagnostics” section (visible without authentication).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/DiagnosticsPanel.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/DiagnosticsPanel.tsx",
+          "frontend/src/components/MantraTemplatePreview.tsx",
           "frontend/src/App.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/DiagnosticsPanel.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
+    "frontend/src/components/MantraTemplatePreview.tsx",
     "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",

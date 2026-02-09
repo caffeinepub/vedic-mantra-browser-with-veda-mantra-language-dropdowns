@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Veda, Language } from './backend';
-import { useMantraNumbers, useMantraMeaning, useMantraText, useMantraMetadata } from './hooks/useQueries';
+import { useMantraNumbers, useMantraMeaning, useMantraText, useMantraMetadata, useMantraTemplate } from './hooks/useQueries';
 import {
   Select,
   SelectContent,
@@ -16,6 +16,7 @@ import { BookOpen, Languages, Library, AlertCircle, Loader2 } from 'lucide-react
 import { MantraMetadataHeader } from './components/MantraMetadataHeader';
 import { MantraAudioSection } from './components/MantraAudioSection';
 import { MantraContentTemplate } from './components/MantraContentTemplate';
+import { MantraTemplatePreview } from './components/MantraTemplatePreview';
 import { ShareArea } from './components/ShareArea';
 import { DiagnosticsPanel } from './components/DiagnosticsPanel';
 
@@ -195,6 +196,9 @@ function App() {
     selectedLanguage
   );
 
+  // Fetch template for fallback display
+  const { data: template } = useMantraTemplate(selectedVeda, selectedMantra);
+
   // Handle Veda change: reset mantra selection immediately
   const handleVedaChange = (value: string) => {
     setSelectedVedaString(value);
@@ -243,9 +247,19 @@ function App() {
     window.history.pushState({}, '', newPath);
   };
 
-  // Determine if we have valid content to display
-  const hasValidContent = selectedMantra > 0n && (mantraText || meaning || metadata);
+  // Determine if we have valid content to display (check for !== null instead of truthy)
+  const hasValidContent = selectedMantra > 0n && (
+    mantraText !== null || meaning !== null || metadata !== null
+  );
   const isLoading = isFetchingText || isFetchingMeaning || isFetchingMetadata;
+
+  // Check if we should show template preview (all content is null but template exists)
+  const shouldShowTemplatePreview = selectedMantra > 0n && 
+    mantraText === null && 
+    meaning === null && 
+    metadata === null && 
+    template && 
+    template.trim().length > 0;
 
   // Check if any query returned an error
   const hasError = textError || meaningError || metadataError || numbersError;
@@ -402,11 +416,13 @@ function App() {
               </Card>
             ) : hasValidContent ? (
               <>
-                {/* Metadata Header */}
-                {metadata && <MantraMetadataHeader metadata={metadata} />}
+                {/* Metadata Header - only render if metadata is a non-null string */}
+                {metadata !== null && metadata !== undefined && typeof metadata === 'string' && (
+                  <MantraMetadataHeader metadata={metadata} />
+                )}
 
                 {/* Mantra Text */}
-                {mantraText && (
+                {mantraText !== null && (
                   <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
                     <CardHeader>
                       <CardTitle>Mantra Text</CardTitle>
@@ -420,7 +436,7 @@ function App() {
                 )}
 
                 {/* Meaning */}
-                {meaning && (
+                {meaning !== null && (
                   <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
                     <CardHeader>
                       <CardTitle>Meaning</CardTitle>
@@ -439,6 +455,17 @@ function App() {
                 {/* Share Area */}
                 <ShareArea />
               </>
+            ) : shouldShowTemplatePreview ? (
+              <>
+                {/* Show template preview when no resolved content exists */}
+                <MantraTemplatePreview template={template!} />
+                
+                {/* Audio Section */}
+                <MantraAudioSection veda={selectedVeda} mantraNumber={selectedMantra} />
+
+                {/* Share Area */}
+                <ShareArea />
+              </>
             ) : (
               <Alert>
                 <AlertCircle className="h-4 w-4" />
@@ -450,8 +477,8 @@ function App() {
           </>
         )}
 
-        {/* Template Editor - Always visible when veda and mantra are selected */}
-        {selectedVedaString && selectedMantra > 0n && (
+        {/* Template Editor */}
+        {selectedVedaString && selectedMantraString && !showUnavailableError && (
           <MantraContentTemplate
             veda={selectedVeda}
             mantraNumber={selectedMantra}
@@ -468,15 +495,19 @@ function App() {
       <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm mt-16">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()}. Built with love using{' '}
-            <a
-              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              caffeine.ai
-            </a>
+            <p>
+              © {new Date().getFullYear()} Vedic Mantra Browser. Built with love using{' '}
+              <a
+                href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
+                  typeof window !== 'undefined' ? window.location.hostname : 'vedic-mantra-browser'
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                caffeine.ai
+              </a>
+            </p>
           </div>
         </div>
       </footer>

@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-mantra-number-dropdown-so-it-can-populate-as-soon-as-mantra-numbers-are-fetched-even-when-the-veda-dropdown-has-not-been-manually-selected-yet-ensure-the-app-defaults-to-samaveda-on-first-load-when-there-is-no-deep-link-so-the-user-can-immediately-see-available-mantras-including-47-and-48",
-      "featureTitle": "Fix the Mantra Number dropdown so it can populate as soon as mantra numbers are fetched, even when the Veda dropdown has not been manually selected yet. Ensure the app defaults to Samaveda on first load (when there is no deep link) so the user can immediately see available mantras (including 47 and 48).",
+      "featureId": "feature-ensure-that-when-a-user-selects-samaveda-mantra-48-from-the-mantra-dropdown-the-app-renders-the-mantra-content-section-metadata-text-and-meaning-instead-of-showing-an-empty-no-content-state",
+      "featureTitle": "Ensure that when a user selects Samaveda Mantra 48 from the mantra dropdown, the app renders the mantra content section (metadata, text, and meaning) instead of showing an empty/no-content state.",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -21,10 +22,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-improve-troubleshooting-visibility-when-the-mantra-numbers-query-fails-or-returns-empty-show-a-clear-inline-state-for-the-mantra-number-dropdown-area-for-a-loading-b-error-and-c-empty-results-error-text-must-be-user-facing-english-and-include-an-actionable-suggestion-to-refresh-reload",
-      "featureTitle": "Improve troubleshooting visibility when the mantra numbers query fails or returns empty: show a clear inline state for the Mantra Number dropdown area for (a) loading, (b) error, and (c) empty results. Error text must be user-facing English and include an actionable suggestion to refresh/reload.",
+      "featureId": "feature-if-a-selected-mantra-has-no-stored-mantra-text-meaning-metadata-all-are-null-but-a-saved-template-exists-for-that-veda-mantra-number-display-the-saved-template-content-in-a-read-only-preview-area-within-the-mantra-content-section",
+      "featureTitle": "If a selected mantra has no stored mantra text/meaning/metadata (all are null) but a saved template exists for that Veda + mantra number, display the saved template content in a read-only preview area within the mantra content section.",
       "files": [
-        "frontend/src/App.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/MantraTemplatePreview.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -36,27 +38,6 @@
       ],
       "testIds": [
         "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-lightweight-backend-diagnostics-query-method-that-returns-basic-backend-state-needed-to-confirm-the-frontend-is-talking-to-the-expected-deployed-canister-e-g-counts-of-mantras-metadata-entries-and-whether-samaveda-47-and-48-exist-expose-this-information-in-the-frontend-in-a-small-non-intrusive-diagnostics-section-visible-without-authentication",
-      "featureTitle": "Add a lightweight backend diagnostics query method that returns basic backend state needed to confirm the frontend is talking to the expected deployed canister (e.g., counts of mantras/metadata entries and whether Samaveda 47 and 48 exist). Expose this information in the frontend in a small, non-intrusive “Diagnostics” section (visible without authentication).",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/DiagnosticsPanel.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
       ],
       "confidence": "high"
     }

@@ -44,8 +44,8 @@ export function useMantraMeaning(veda: Veda, mantraNumber: bigint, language: Lan
     queryFn: async () => {
       if (!actor) return null;
       const result = await actor.getMantraMeaning(veda, mantraNumber, language);
-      // Ensure we return null for empty/undefined results
-      return result || null;
+      // Use nullish coalescing to preserve empty strings (valid backend responses)
+      return result ?? null;
     },
     enabled: !!actor && !isActorFetching && mantraNumber > 0n,
     staleTime: 0, // Always fetch fresh data to avoid stale content
@@ -65,8 +65,8 @@ export function useMantraText(veda: Veda, mantraNumber: bigint, language: Langua
     queryFn: async () => {
       if (!actor) return null;
       const result = await actor.getMantraText(veda, mantraNumber, language);
-      // Ensure we return null for empty/undefined results
-      return result || null;
+      // Use nullish coalescing to preserve empty strings (valid backend responses)
+      return result ?? null;
     },
     enabled: !!actor && !isActorFetching && mantraNumber > 0n,
     staleTime: 0, // Always fetch fresh data to avoid stale content
@@ -86,8 +86,8 @@ export function useMantraMetadata(veda: Veda, mantraNumber: bigint, language: La
     queryFn: async () => {
       if (!actor) return null;
       const result = await actor.getMantraMetadata(veda, mantraNumber, language);
-      // Ensure we return null for empty/undefined results
-      return result || null;
+      // Use nullish coalescing to preserve empty strings (valid backend responses)
+      return result ?? null;
     },
     enabled: !!actor && !isActorFetching && mantraNumber > 0n,
     staleTime: 0, // Always fetch fresh data to avoid stale content
@@ -107,7 +107,7 @@ export function useMantraAudio(veda: Veda, mantraNumber: bigint) {
     queryFn: async () => {
       if (!actor) return null;
       const result = await actor.getMantraAudioFile(veda, mantraNumber);
-      return result || null;
+      return result ?? null;
     },
     enabled: !!actor && !isActorFetching && mantraNumber > 0n,
     staleTime: 0,
@@ -165,7 +165,7 @@ export function useMantraTemplate(veda: Veda, mantraNumber: bigint) {
     queryFn: async () => {
       if (!actor) return null;
       const result = await actor.getMantraTemplate(veda, mantraNumber);
-      return result || null;
+      return result ?? null;
     },
     enabled: !!actor && !isActorFetching && mantraNumber > 0n,
     staleTime: 0,

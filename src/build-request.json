@@ -1,72 +1,51 @@
 {
   "kind": "build_request",
-  "title": "Fix mantra-number dropdown showing no entries (47/48 missing) and add diagnostics for canister/data freshness",
+  "title": "Show content when selecting Mantra 48",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Mantra Number dropdown so it can populate as soon as mantra numbers are fetched, even when the Veda dropdown has not been manually selected yet. Ensure the app defaults to Samaveda on first load (when there is no deep link) so the user can immediately see available mantras (including 47 and 48).",
+      "text": "Ensure that when a user selects Samaveda Mantra 48 from the mantra dropdown, the app renders the mantra content section (metadata, text, and meaning) instead of showing an empty/no-content state.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Now I'm not seeing any mantra in the dropdown either 47 or 48"
+          "When I select mantra 48 it should display the content"
         ]
       },
       "acceptanceCriteria": [
-        "On a fresh load with no deep-link URL, the Veda selection defaults to Samaveda and the Mantra Number dropdown is enabled once numbers finish loading.",
-        "For Samaveda, the Mantra Number dropdown shows at least Mantra 47 and Mantra 48 (based on the current backend data).",
-        "Changing the selected Veda still resets the selected mantra as it does today, without leaving the mantra dropdown permanently disabled."
+        "Given Veda = Samaveda and Mantra Number = 48 are selected, the UI renders the Mantra Text and Meaning cards when the backend returns non-null values.",
+        "The UI does not display a stale \"No content available\" message for Mantra 48 if data is available from the backend after loading completes.",
+        "Switching from another mantra to Mantra 48 results in new content being displayed (no previous mantra content remains visible after loading finishes)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Improve troubleshooting visibility when the mantra numbers query fails or returns empty: show a clear inline state for the Mantra Number dropdown area for (a) loading, (b) error, and (c) empty results. Error text must be user-facing English and include an actionable suggestion to refresh/reload.",
+      "text": "If a selected mantra has no stored mantra text/meaning/metadata (all are null) but a saved template exists for that Veda + mantra number, display the saved template content in a read-only preview area within the mantra content section.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-1"
         ],
         "quotes": [
-          "Now I'm not seeing any mantra in the dropdown either 47 or 48"
+          "When I select mantra 48 it should display the content"
         ]
       },
       "acceptanceCriteria": [
-        "When mantra numbers are loading, the Mantra Number control shows a loading state (not an empty dropdown).",
-        "If fetching mantra numbers fails, the UI shows an error message in the selection card (not only in the console).",
-        "If fetching succeeds but returns an empty list, the UI shows an explicit empty-state message (e.g., “No mantras available for this Veda.”) instead of an empty dropdown list."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Add a lightweight backend diagnostics query method that returns basic backend state needed to confirm the frontend is talking to the expected deployed canister (e.g., counts of mantras/metadata entries and whether Samaveda 47 and 48 exist). Expose this information in the frontend in a small, non-intrusive “Diagnostics” section (visible without authentication).",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Now I'm not seeing any mantra in the dropdown either 47 or 48"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend exposes a new query method that returns diagnostics sufficient to confirm that Samaveda mantras 47 and 48 are present (true/false) and includes basic counts.",
-        "Frontend displays the returned diagnostics data somewhere on the main page (collapsed panel or small card) without requiring login.",
-        "If the diagnostics query fails, the frontend shows a simple English error line in the diagnostics area."
+        "When mantraText, meaning, and metadata are all null for the current selection and getMantraTemplate returns a non-empty template string, the UI shows a read-only template preview instead of the generic \"No content available\" message.",
+        "The template preview is visible without opening the template editor and updates when the user changes the selected mantra number.",
+        "If both resolved content (text/meaning/metadata) and a template exist, the UI prefers the resolved content and does not show the template preview by default."
       ]
     }
   ],
   "constraints": [
-    "Do not edit any files under frontend/src/components/ui (compose existing shadcn components instead).",
-    "Do not modify immutable hook files (frontend/src/hooks/useInternetIdentity.ts / .tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
-    "Backend must remain a single Motoko actor in backend/main.mo; only add migration.mo if state schema changes require it (avoid if possible)."
+    "Do not modify any files under frontend/src/components/ui or any other paths listed as immutable in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Adding new mantra content beyond what is already present in the backend.",
-    "Adding new authentication methods beyond Internet Identity.",
-    "Implementing real-time updates (e.g., websockets) for dropdown contents."
+    "Do not add new Vedas, mantra datasets, or change the existing mantra text/meaning content in the backend.",
+    "Do not implement external services or third-party integrations for content storage."
   ],
   "imageRequirements": {
     "required": [],

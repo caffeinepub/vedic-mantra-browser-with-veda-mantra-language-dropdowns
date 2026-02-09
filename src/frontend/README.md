@@ -6,45 +6,25 @@ A web application for exploring Vedic mantras across different Vedas and languag
 
 **Public URL:** `https://<frontend-canister-id>.icp0.io`
 
-> **Note:** After deploying to mainnet, update the `<frontend-canister-id>` above with your actual frontend canister ID.
+> **Note:** After deploying to mainnet, update the `<frontend-canister-id>` above with your actual frontend canister ID from the deployment output.
 
 ## Features
 
 - Browse mantras from Rigveda, Yajurveda, Samaveda, and Atharvaveda
 - View mantra text, meaning, and metadata in Telugu, English, and Hindi
 - Audio playback and upload for select mantras (requires Internet Identity authentication)
-- Deep-linkable URLs for sharing specific mantras
+- Deep-linkable URLs for sharing specific mantras (e.g., `/samaveda/47`)
 - Responsive design with light and dark mode support
+- Real-time backend diagnostics for data verification
 
 ## Canister IDs
 
-After deployment, record your canister IDs here:
+After deployment, record your canister IDs here (from `./frontend/scripts/deploy-ic.sh` output):
 
 - **Frontend Canister:** `<frontend-canister-id>`
 - **Backend Canister:** `<backend-canister-id>`
 
 ## Development
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for instructions on deploying to the Internet Computer mainnet.
+### Local Development
 
-### Template Editor
-
-The Mantra Content Template editor is hidden by default in production builds. To enable it:
-
-**In Development:**
-- The template editor is automatically visible when running `npm start` or in development mode.
-
-**In Production:**
-- Set the environment variable `VITE_ENABLE_TEMPLATE_EDITOR=true` to explicitly enable the template editor in production builds.
-- By default, the template editor is hidden in production deployments for a cleaner user experience.
-
-## Technology Stack
-
-- **Frontend:** React + TypeScript + Tailwind CSS
-- **Backend:** Motoko
-- **Platform:** Internet Computer (ICP)
-- **Authentication:** Internet Identity
-
-## License
-
-© 2026. Built with love using [caffeine.ai](https://caffeine.ai)
