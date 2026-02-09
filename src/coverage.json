@@ -1,54 +1,68 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T04:19:50.276Z",
+  "generatedAt": "2026-02-09T04:26:51.348Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 3,
-    "implemented": 2,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Ensure the backend `getMantraNumbers(#samaVeda)` query returns a list that includes mantra number 47 and is consistently ordered and de-duplicated.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
+        "summary": "Deploy the application (frontend + backend canisters) to the Internet Computer mainnet so it is publicly accessible without local tooling.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/public/404.html",
+          "frontend/src/App.tsx",
+          "frontend/DEPLOYMENT.md"
+        ],
+        "matchedFiles": [
+          "frontend/public/404.html",
+          "frontend/src/App.tsx",
+          "frontend/DEPLOYMENT.md"
+        ]
       },
       {
         "id": "REQ-2",
-        "summary": "Update the Mantra Number dropdown options rendering so that mantra 47 is visible/selectable when Samaveda is selected, and add a clear, user-visible diagnostic message (English) if the backend returns mantra numbers for Samaveda but 47 is unexpectedly missing.",
+        "summary": "Provide the public URL for the deployed app in a human-readable form within the repository (e.g., in a root-level README) and ensure it matches the deployed frontend canister URL.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/utils/selectValueGuards.ts"
+          "frontend/README.md",
+          "frontend/DEPLOYMENT.md"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx"
+          "frontend/README.md",
+          "frontend/DEPLOYMENT.md"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Set sensible initial defaults so the app does not appear empty in a fresh session when only a small set of mantras exists (e.g., auto-select Samaveda if it is the only Veda with available mantras; otherwise keep current default behavior).",
+        "summary": "Add an in-app “Share” area that displays the current page URL and allows copying it to the clipboard, so users can easily share the publicly accessible link.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/components/ShareArea.tsx",
           "frontend/src/App.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/components/ShareArea.tsx",
           "frontend/src/App.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/DEPLOYMENT.md",
+    "frontend/README.md",
+    "frontend/public/404.html",
     "frontend/src/App.tsx",
+    "frontend/src/components/ShareArea.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

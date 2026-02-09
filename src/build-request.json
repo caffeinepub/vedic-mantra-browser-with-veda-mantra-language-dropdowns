@@ -1,71 +1,70 @@
 {
   "kind": "build_request",
-  "title": "Fix missing Mantra 47 option in mantra number dropdown",
+  "title": "Publish the app and provide a publicly accessible URL",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Ensure the backend `getMantraNumbers(#samaVeda)` query returns a list that includes mantra number 47 and is consistently ordered and de-duplicated.",
-      "target": "backend",
+      "text": "Deploy the application (frontend + backend canisters) to the Internet Computer mainnet so it is publicly accessible without local tooling.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "Still 47 mantra is not showing in the dropdown"
+          "Please  publish  and provide the url, so that it can be viewed by everyone"
         ]
       },
       "acceptanceCriteria": [
-        "Calling `getMantraNumbers(#samaVeda)` returns an array containing `47`.",
-        "The returned array is sorted ascending and contains no duplicates.",
-        "No other backend query methods regress (meaning/text/metadata/audio still work as before)."
+        "The app is deployed to the IC mainnet (not local replica).",
+        "A user can access the app from a standard browser on a separate network/machine without any local build steps.",
+        "The deployment produces stable canister IDs for both frontend and backend canisters."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Update the Mantra Number dropdown options rendering so that mantra 47 is visible/selectable when Samaveda is selected, and add a clear, user-visible diagnostic message (English) if the backend returns mantra numbers for Samaveda but 47 is unexpectedly missing.",
+      "text": "Provide the public URL for the deployed app in a human-readable form within the repository (e.g., in a root-level README) and ensure it matches the deployed frontend canister URL.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "Still 47 mantra is not showing in the dropdown"
+          "provide the url, so that it can be viewed by everyone"
         ]
       },
       "acceptanceCriteria": [
-        "When the user selects Samaveda, the Mantra Number dropdown list includes option \"47\".",
-        "If Samaveda is selected and the loaded mantra numbers do not include \"47\", the UI shows an English warning in the selection area that explicitly states that 47 is missing and lists the received options.",
-        "Selecting \"47\" updates the Select trigger to display \"47\" and the page loads text/meaning/metadata for Samaveda mantra 47 (no blank trigger state)."
+        "A root-level README (or equivalent project documentation file) includes the exact public URL to access the app.",
+        "The documented URL loads the deployed app successfully and shows the SPA (not a 404)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Set sensible initial defaults so the app does not appear empty in a fresh session when only a small set of mantras exists (e.g., auto-select Samaveda if it is the only Veda with available mantras; otherwise keep current default behavior).",
+      "text": "Add an in-app “Share” area that displays the current page URL and allows copying it to the clipboard, so users can easily share the publicly accessible link.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-4"
         ],
         "quotes": [
-          "Still 47 mantra is not showing in the dropdown"
+          "provide the url"
         ]
       },
       "acceptanceCriteria": [
-        "On first load (no deep link), if only one Veda has any mantra numbers available, that Veda is selected automatically.",
-        "After the Veda is auto-selected, the first available mantra number is auto-selected and displayed in the dropdown trigger."
+        "The UI shows the current full URL (including the selected Veda/mantra path when present).",
+        "A copy action copies the URL to clipboard and provides a visible success state in English.",
+        "The feature works in modern browsers without requiring authentication."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in `backend/main.mo`.",
-    "Do not edit files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or anything in `frontend/src/components/ui` (compose/consume only).",
-    "Use English for any user-facing text."
+    "Backend must remain single-actor (all Motoko logic in backend/main.mo).",
+    "Do not modify files under frontend/src/components/ui or other immutablePaths; compose existing UI components instead."
   ],
   "nonGoals": [
-    "Adding new mantra content beyond what is required to make Mantra 47 appear correctly.",
-    "Adding new authentication methods beyond Internet Identity.",
-    "Adding real-time updates or push notifications."
+    "Adding third-party hosting (AWS/Vercel/Netlify) or non-IC deployment targets.",
+    "Adding non-Internet-Identity authentication methods.",
+    "Changing mantra content/data unless required for deployment stability."
   ],
   "imageRequirements": {
     "required": [],
@@ -74,7 +73,9 @@
   "userProfileUpdate": {
     "goalsToAdd": [],
     "goalsToRemove": [],
-    "preferencesToAdd": [],
+    "preferencesToAdd": [
+      "User-facing text must be in English."
+    ],
     "preferencesToRemove": [],
     "miscToAdd": [],
     "miscToRemove": [],

@@ -3,22 +3,28 @@
   "projectStateVersion": 3,
   "summary": "New project",
   "architectural_notes": [],
-  "known_issues": [
-    "Dropdown is missing the '47 mantra' option (user reports it is not showing)."
-  ],
-  "isFixRequest": true,
+  "known_issues": [],
+  "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-the-mantra-number-dropdown-options-rendering-so-that-mantra-47-is-visible-selectable-when-samaveda-is-selected-and-add-a-clear-user-visible-diagnostic-message-english-if-the-backend-returns-mantra-numbers-for-samaveda-but-47-is-unexpectedly-missing",
-      "title": "Update the Mantra Number dropdown options rendering so that mantra 47 is visible/selectable when Samaveda is selected, and add a clear, user-visible diagnostic message (English) if the backend returns mantra numbers for Samaveda but 47 is unexpectedly missing.",
+      "id": "feature-deploy-the-application-frontend-backend-canisters-to-the-internet-computer-mainnet-so-it-is-publicly-accessible-without-local-tooling",
+      "title": "Deploy the application (frontend + backend canisters) to the Internet Computer mainnet so it is publicly accessible without local tooling.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-the-public-url-for-the-deployed-app-in-a-human-readable-form-within-the-repository-e-g-in-a-root-level-readme-and-ensure-it-matches-the-deployed-frontend-canister-url",
+      "title": "Provide the public URL for the deployed app in a human-readable form within the repository (e.g., in a root-level README) and ensure it matches the deployed frontend canister URL.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-set-sensible-initial-defaults-so-the-app-does-not-appear-empty-in-a-fresh-session-when-only-a-small-set-of-mantras-exists-e-g-auto-select-samaveda-if-it-is-the-only-veda-with-available-mantras-otherwise-keep-current-default-behavior",
-      "title": "Set sensible initial defaults so the app does not appear empty in a fresh session when only a small set of mantras exists (e.g., auto-select Samaveda if it is the only Veda with available mantras; otherwise keep current default behavior).",
+      "id": "feature-add-an-in-app-share-area-that-displays-the-current-page-url-and-allows-copying-it-to-the-clipboard-so-users-can-easily-share-the-publicly-accessible-link",
+      "title": "Add an in-app “Share” area that displays the current page URL and allows copying it to the clipboard, so users can easily share the publicly accessible link.",
       "reqIds": [
         "REQ-3"
       ],
@@ -28,14 +34,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Ensure the backend `getMantraNumbers(#samaVeda)` query returns a list that includes mantra number 47 and is consistently ordered and de-duplicated.",
-      "reqIds": [
-        "REQ-1"
-      ],
+      "summary": "Publish the app and provide a publicly accessible URL for everyone to view",
+      "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Fix missing Mantra 47 option in mantra number dropdown",
+  "projectName": "Publish the app and provide a publicly accessible URL",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

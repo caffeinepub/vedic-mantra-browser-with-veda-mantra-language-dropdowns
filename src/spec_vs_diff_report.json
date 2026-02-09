@@ -1,60 +1,68 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T04:19:50.274Z",
-  "summary": "Backend adds Samaveda mantra 47 content, and frontend App.tsx appears to add dropdown/selection handling (including diagnostics and auto-selection). However, the backend getMantraNumbers implementation is still a simple map/filter with no explicit sorting or de-duplication, so REQ-1’s ordering/de-duplication requirement is not met at the backend level. Several additional frontend features/files are described that are not requested by the BuildRequest.",
+  "generatedAt": "2026-02-09T04:26:51.346Z",
+  "summary": "REQ-3 (in-app Share area with copy-to-clipboard and visible success state) appears implemented. REQ-1 (actual IC mainnet deployment with stable canister IDs) is not evidenced by the diff. REQ-2 (document exact public URL in a root-level README matching the deployed frontend canister) is not met: documentation is added under frontend/ and uses a placeholder URL.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Ensure the backend `getMantraNumbers(#samaVeda)` query returns a list that is consistently ordered (sorted ascending) and de-duplicated.",
-      "reason": "In `backend/main.mo`, `getMantraNumbers` filters keys and maps to `mantraNumber` but does not apply any sort or de-duplication step. This does not guarantee ascending order or uniqueness at the backend level.",
+      "requirement": "Deploy the application (frontend + backend canisters) to the Internet Computer mainnet so it is publicly accessible without local tooling, producing stable canister IDs.",
+      "reason": "The diff only adds/changes frontend code and documentation; it does not show any actual mainnet deployment artifacts (e.g., recorded mainnet canister IDs, deployment outputs, or configuration changes proving mainnet deployment).",
       "evidence": [
-        "backend/main.mo"
+        "frontend/DEPLOYMENT.md",
+        "frontend/README.md",
+        "project_state.json"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Provide the public URL for the deployed app in a human-readable form within the repository (e.g., in a root-level README) and ensure it matches the deployed frontend canister URL.",
+      "reason": "The documented URL is a placeholder (https://<frontend-canister-id>.icp0.io) and the README is not root-level (it is under frontend/). No exact deployed URL is provided.",
+      "evidence": [
+        "frontend/README.md"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Deep-link routing support (e.g., parsing and syncing URLs like `/<veda-slug>/<number>`).",
-      "reason": "Not requested in any requirement; BuildRequest only mentions fresh-session defaults when no deep link, not adding deep-link routing features.",
+      "description": "Added SPA deep-link fallback infrastructure via 404.html redirect and a static-hosting _redirects rule.",
+      "reason": "Not explicitly requested by the BuildRequest (though it may support deep-linking/deployment), and goes beyond the specified requirements.",
       "evidence": [
-        "frontend/src/App.tsx"
+        "frontend/public/404.html",
+        "frontend-file-summaries.txt (mentions frontend/public/_redirects)"
       ]
     },
     {
-      "description": "SPA hosting fallbacks via `frontend/public/_redirects` and `frontend/public/404.html`.",
-      "reason": "Not requested; no requirements mention hosting configuration or adding redirect/404 fallback files.",
+      "description": "UI theming and styling changes (new parchment-inspired palette, Tailwind token changes, metadata label emphasis styling).",
+      "reason": "Not requested by REQ-1/2/3; these are additional design/system changes unrelated to deploying and sharing a public URL.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend-file-summaries.txt (frontend/src/index.css, frontend/tailwind.config.js, frontend/src/components/MantraMetadataHeader.tsx)"
       ]
     },
     {
-      "description": "Global UI re-theme (parchment-inspired OKLCH palette) and Tailwind theme token changes.",
-      "reason": "Not requested; requirements focus on dropdown option visibility/diagnostics and initial defaults, not UI rebranding/theme work.",
+      "description": "Data/UI behavior changes in hooks (de-duplicating and numerically sorting mantra numbers for stable dropdown options).",
+      "reason": "Not requested by REQ-1/2/3; this is additional functionality/behavior change.",
       "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend-file-summaries.txt (frontend/src/hooks/useQueries.ts)"
       ]
     },
     {
-      "description": "New/changed audio behavior requiring Internet Identity authentication to upload/replace audio and allowing anonymous playback.",
-      "reason": "Not requested; BuildRequest explicitly lists non-goal of adding new authentication methods, and does not request changing audio upload/play rules.",
+      "description": "Added a separate deployment guide document under frontend/ (DEPLOYMENT.md) with extensive instructions and checklists.",
+      "reason": "REQ-2 asks for the public URL to be documented (e.g., in a root-level README) but does not request a new comprehensive deployment guide document.",
       "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "New utility module `frontend/src/utils/selectValueGuards.ts` for Select value coercion/blank-trigger prevention.",
-      "reason": "Not requested explicitly; while it may help avoid blank trigger state, creating a new utility module is beyond stated requirements (REQ-2 only requires correct selection/display for 47 and a diagnostic message).",
-      "evidence": [
-        "frontend-file-summaries.txt"
+        "frontend/DEPLOYMENT.md",
+        "frontend-file-summaries.txt (frontend/DEPLOYMENT.md)"
       ]
     }
   ],
-  "confidence": 0.64,
+  "confidence": 0.74,
   "changed_files": [
-    "backend/main.mo",
     "frontend-file-summaries.txt",
+    "frontend/DEPLOYMENT.md",
+    "frontend/README.md",
+    "frontend/public/404.html",
     "frontend/src/App.tsx",
+    "frontend/src/components/ShareArea.tsx",
     "project_state.json"
   ]
 }

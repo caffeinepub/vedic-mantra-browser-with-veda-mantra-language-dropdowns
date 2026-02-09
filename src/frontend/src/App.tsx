@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { BookOpen, Languages, Library, AlertCircle } from 'lucide-react';
 import { MantraMetadataHeader } from './components/MantraMetadataHeader';
 import { MantraAudioSection } from './components/MantraAudioSection';
+import { ShareArea } from './components/ShareArea';
 
 const VEDA_OPTIONS = [
   { value: 'rikVeda', label: 'Rigveda', slug: 'rigveda', enum: Veda.rikVeda },
@@ -64,7 +65,17 @@ function App() {
 
   // Parse deep link on initial load - support /<veda-slug>/<number>
   useEffect(() => {
-    const path = window.location.pathname;
+    // First check if we have a redirect query parameter from 404.html
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectPath = urlParams.get('redirect');
+    
+    let path = redirectPath || window.location.pathname;
+    
+    // If we had a redirect, clean up the URL
+    if (redirectPath) {
+      window.history.replaceState({}, '', redirectPath);
+    }
+    
     // Match /<veda-slug>/:number with optional trailing slash, case-insensitive
     const match = path.match(/^\/([a-z]+)\/(\d+)\/?$/i);
     
@@ -394,6 +405,11 @@ function App() {
             </CardContent>
           </Card>
 
+          {/* Share Area */}
+          {selectedMantra > 0n && selectedVedaString && (
+            <ShareArea />
+          )}
+
           {/* Mantra Text Display */}
           <Card className="mb-8 shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
@@ -437,57 +453,38 @@ function App() {
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-4/6" />
+                  <Skeleton className="h-4 w-4/5" />
                 </div>
               )}
 
-              {/* Only show content when not fetching and no error */}
-              {!isFetchingMetadata && !isFetchingText && !textError && !metadataError && selectedMantra > 0n && (
-                <div className="space-y-6">
-                  {/* Metadata Header */}
-                  {hasValidText(metadata) && (
-                    <MantraMetadataHeader metadata={metadata!} />
-                  )}
+              {/* Show metadata if available */}
+              {!isFetchingMetadata && hasValidText(metadata) && (
+                <MantraMetadataHeader metadata={metadata!} />
+              )}
 
-                  {/* Mantra Text */}
-                  <div className="prose prose-lg max-w-none dark:prose-invert">
-                    {hasValidText(mantraText) ? (
-                      <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap font-medium">
-                        {mantraText}
-                      </p>
-                    ) : (
-                      <Alert>
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>
-                          No text is available for <strong>{vedaLabel}</strong>, Mantra <strong>{selectedMantra.toString()}</strong>, in <strong>{languageLabel}</strong>.
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
+              {/* Show text if available */}
+              {!isFetchingText && hasValidText(mantraText) && (
+                <div className="prose prose-lg max-w-none mt-4">
+                  <p className="whitespace-pre-wrap text-foreground leading-relaxed">
+                    {mantraText}
+                  </p>
                 </div>
               )}
 
-              {selectedMantra === 0n && (
+              {/* Show message if no text available */}
+              {!isFetchingText && !hasValidText(mantraText) && selectedMantra > 0n && (
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Please select a mantra number to view its text.
+                    No text available for this mantra in {languageLabel}.
                   </AlertDescription>
                 </Alert>
               )}
             </CardContent>
           </Card>
 
-          {/* Audio Section - Only for Samaveda Mantra 47 */}
-          {shouldShowAudio && (
-            <MantraAudioSection
-              veda={selectedVeda}
-              mantraNumber={selectedMantra}
-            />
-          )}
-
           {/* Mantra Meaning Display */}
-          <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+          <Card className="mb-8 shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-xl">Meaning</CardTitle>
               <CardDescription>
@@ -509,42 +506,42 @@ function App() {
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-4/6" />
+                  <Skeleton className="h-4 w-4/5" />
                 </div>
               )}
 
-              {/* Only show content when not fetching and no error */}
-              {!isFetchingMeaning && !meaningError && selectedMantra > 0n && (
-                <div className="prose prose-lg max-w-none dark:prose-invert">
-                  {hasValidText(meaning) ? (
-                    <p className="text-base leading-relaxed text-muted-foreground whitespace-pre-wrap">
-                      {meaning}
-                    </p>
-                  ) : (
-                    <Alert>
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        No meaning is available for <strong>{vedaLabel}</strong>, Mantra <strong>{selectedMantra.toString()}</strong>, in <strong>{languageLabel}</strong>.
-                      </AlertDescription>
-                    </Alert>
-                  )}
+              {/* Show meaning if available */}
+              {!isFetchingMeaning && hasValidText(meaning) && (
+                <div className="prose prose-lg max-w-none">
+                  <p className="whitespace-pre-wrap text-foreground leading-relaxed">
+                    {meaning}
+                  </p>
                 </div>
               )}
 
-              {selectedMantra === 0n && (
+              {/* Show message if no meaning available */}
+              {!isFetchingMeaning && !hasValidText(meaning) && selectedMantra > 0n && (
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    Please select a mantra number to view its meaning.
+                    No meaning available for this mantra in {languageLabel}.
                   </AlertDescription>
                 </Alert>
               )}
             </CardContent>
           </Card>
+
+          {/* Audio Section - Only for Samaveda Mantra 47 */}
+          {shouldShowAudio && (
+            <MantraAudioSection
+              veda={selectedVeda}
+              mantraNumber={selectedMantra}
+            />
+          )}
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm mt-16">
+        <footer className="border-t border-border/40 bg-card/50 backdrop-blur-sm mt-16">
           <div className="container mx-auto px-4 py-6">
             <p className="text-center text-sm text-muted-foreground">
               © 2026. Built with love using{' '}
@@ -552,7 +549,7 @@ function App() {
                 href="https://caffeine.ai"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline font-medium"
+                className="text-primary hover:underline"
               >
                 caffeine.ai
               </a>

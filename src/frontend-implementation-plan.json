@@ -1,41 +1,72 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Samaveda Mantra 47 dropdown visibility and add diagnostics + sensible defaults",
+  "title": "Mainnet-ready IC deployment docs + in-app share link",
   "requirements": [
     {
-      "id": "REQ-2",
-      "summary": "Ensure Mantra 47 renders/selects for Samaveda and show an English warning if Samaveda numbers load but 47 is missing.",
+      "id": "REQ-1",
+      "summary": "Make the SPA routing and deep links work reliably when deployed to IC mainnet (public access without local tooling).",
       "acceptanceCriteria": [
-        "When the user selects Samaveda, the Mantra Number dropdown list includes option \"47\".",
-        "If Samaveda is selected and the loaded mantra numbers do not include \"47\", the UI shows an English warning in the selection area that explicitly states that 47 is missing and lists the received options.",
-        "Selecting \"47\" updates the Select trigger to display \"47\" and the page loads text/meaning/metadata for Samaveda mantra 47 (no blank trigger state)."
+        "The app is deployed to the IC mainnet (not local replica).",
+        "A user can access the app from a standard browser on a separate network/machine without any local build steps.",
+        "The deployment produces stable canister IDs for both frontend and backend canisters."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/public/404.html",
           "operation": "modify",
-          "description": "Update the Mantra Number Select to (1) use a guarded controlled value (via the existing select value guard) to prevent blank trigger states, (2) add a Samaveda-specific diagnostic warning when numbers are loaded but 47 is missing, and (3) ensure the dropdown options always render from the sorted/de-duplicated numbers list. Use existing shadcn-ui Select and Alert components (compose/consume only; do not edit components under frontend/src/components/ui). Verify the component's usage instructions before implementing."
+          "description": "Update the SPA fallback behavior for IC static hosting so unknown paths redirect to the app entry while preserving the originally requested path (so deep links like /rigveda/10 still load correctly after mainnet deployment)."
         },
         {
-          "path": "frontend/src/utils/selectValueGuards.ts",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "If needed to support App-level guard usage, extend or refine safeSelectValue behavior so it can be used cleanly with shadcn-ui Select value props without introducing blank trigger states when a value is valid (including \"47\"). Keep behavior English-only (no user-facing strings here)."
+          "description": "Handle the preserved deep-link redirect from the SPA fallback (e.g., query parameter from 404.html) by restoring the intended path before the existing deep-link parsing runs, ensuring routing works on IC mainnet refresh and direct link visits."
+        },
+        {
+          "path": "frontend/DEPLOYMENT.md",
+          "operation": "create",
+          "description": "Add IC mainnet deployment documentation (frontend + backend canisters) focusing on producing stable canister IDs and a publicly accessible URL; include where to record the resulting canister IDs/URLs after deployment."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Document the deployed public URL in-repo so it matches the deployed frontend canister URL.",
+      "acceptanceCriteria": [
+        "A root-level README (or equivalent project documentation file) includes the exact public URL to access the app.",
+        "The documented URL loads the deployed app successfully and shows the SPA (not a 404)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/README.md",
+          "operation": "create",
+          "description": "Create a human-readable documentation file that includes the exact public URL for the deployed frontend canister (and optionally backend canister ID) and notes that the URL must be updated to match the mainnet deployment result."
+        },
+        {
+          "path": "frontend/DEPLOYMENT.md",
+          "operation": "modify",
+          "description": "Reference the documentation location for the public URL and add a reminder to keep the documented URL synchronized with the deployed frontend canister URL."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Auto-select a sensible initial Veda/mantra when only one Veda has available mantras and the session is not deep-linked.",
+      "summary": "Add an in-app Share area that shows the current page URL and supports copying it to clipboard with an English success state.",
       "acceptanceCriteria": [
-        "On first load (no deep link), if only one Veda has any mantra numbers available, that Veda is selected automatically.",
-        "After the Veda is auto-selected, the first available mantra number is auto-selected and displayed in the dropdown trigger."
+        "The UI shows the current full URL (including the selected Veda/mantra path when present).",
+        "A copy action copies the URL to clipboard and provides a visible success state in English.",
+        "The feature works in modern browsers without requiring authentication."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/ShareArea.tsx",
+          "operation": "create",
+          "description": "Create a ShareArea component that displays the current full URL and provides a copy-to-clipboard action with a visible English success state. Use shadcn-ui components (e.g., Button/Card/Label where appropriate) to match the app styling; verify the component's usage instructions before implementing."
+        },
+        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add a first-load auto-defaulting flow: fetch mantra numbers for all Vedas (using the existing React Query hook) and, when not deep-linked, auto-select the only Veda that has any numbers. After the Veda auto-selects, ensure the first available mantra number is selected and shown in the Mantra Number Select trigger. Keep current behavior when multiple Vedas have numbers. Use existing shadcn-ui Select components (compose/consume only; do not edit components under frontend/src/components/ui). Verify the component's usage instructions before implementing."
+          "description": "Wire ShareArea into the main UI (non-authenticated area) and ensure the displayed URL reflects the current selection-based route (e.g., /<veda-slug>/<number>) and updates as selections change."
         }
       ]
     }

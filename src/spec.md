@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Ensure Samaveda mantra number 47 is returned by the backend, appears in the Mantra Number dropdown, and the app selects sensible defaults so the UI isn’t empty on first load.
+**Goal:** Deploy the app to the Internet Computer (IC) mainnet and make it publicly accessible via a stable URL.
 
 **Planned changes:**
-- Backend: Fix `getMantraNumbers(#samaVeda)` to include mantra `47`, and ensure results are consistently sorted ascending and de-duplicated.
-- Frontend: Update Mantra Number dropdown rendering so option `47` is visible/selectable when Samaveda is selected.
-- Frontend: Add an English, user-visible warning when Samaveda is selected and the loaded mantra numbers are missing `47`, including the received options for diagnostics.
-- Frontend: Add initial default selection behavior so that on a fresh session (no deep link), if only one Veda has available mantras it is auto-selected, and then the first available mantra number is auto-selected and shown in the dropdown trigger.
+- Deploy both frontend and backend canisters to the IC mainnet with stable canister IDs.
+- Add a root-level README (or equivalent) that documents the exact public URL for the deployed frontend canister.
+- Add an in-app “Share” area that shows the current full page URL (including selected Veda/mantra path when present) and provides a copy-to-clipboard action with a visible English success state.
 
-**User-visible outcome:** When selecting Samaveda, users can see and select mantra number 47, the selection trigger correctly displays it and loads its content, and the app auto-selects a Veda/mantra on first load when only a small set is available (with a clear warning if 47 is unexpectedly missing).
+**User-visible outcome:** Anyone can open the app from a standard browser using the documented public URL, and users can copy/share the current page link directly from within the app.
