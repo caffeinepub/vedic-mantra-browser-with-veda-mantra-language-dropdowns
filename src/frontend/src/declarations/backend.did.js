@@ -60,6 +60,11 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   'addMantraAudioFile' : IDL.Func([Veda, IDL.Nat, ExternalBlob], [], []),
+  'getAllMantraNumbersForVeda' : IDL.Func(
+      [Veda],
+      [IDL.Vec(IDL.Nat)],
+      ['query'],
+    ),
   'getMantraAudioFile' : IDL.Func(
       [Veda, IDL.Nat],
       [IDL.Opt(ExternalBlob)],
@@ -76,10 +81,20 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'getMantraNumbers' : IDL.Func([Veda], [IDL.Vec(IDL.Nat)], ['query']),
+  'getMantraTemplate' : IDL.Func(
+      [Veda, IDL.Nat],
+      [IDL.Opt(IDL.Text)],
+      ['query'],
+    ),
   'getMantraText' : IDL.Func(
       [Veda, IDL.Nat, Language],
       [IDL.Opt(IDL.Text)],
       ['query'],
+    ),
+  'submitTemplate' : IDL.Func(
+      [Veda, IDL.Nat, IDL.Text],
+      [IDL.Vec(IDL.Nat)],
+      [],
     ),
 });
 
@@ -138,6 +153,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     'addMantraAudioFile' : IDL.Func([Veda, IDL.Nat, ExternalBlob], [], []),
+    'getAllMantraNumbersForVeda' : IDL.Func(
+        [Veda],
+        [IDL.Vec(IDL.Nat)],
+        ['query'],
+      ),
     'getMantraAudioFile' : IDL.Func(
         [Veda, IDL.Nat],
         [IDL.Opt(ExternalBlob)],
@@ -154,10 +174,20 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getMantraNumbers' : IDL.Func([Veda], [IDL.Vec(IDL.Nat)], ['query']),
+    'getMantraTemplate' : IDL.Func(
+        [Veda, IDL.Nat],
+        [IDL.Opt(IDL.Text)],
+        ['query'],
+      ),
     'getMantraText' : IDL.Func(
         [Veda, IDL.Nat, Language],
         [IDL.Opt(IDL.Text)],
         ['query'],
+      ),
+    'submitTemplate' : IDL.Func(
+        [Veda, IDL.Nat, IDL.Text],
+        [IDL.Vec(IDL.Nat)],
+        [],
       ),
   });
 };

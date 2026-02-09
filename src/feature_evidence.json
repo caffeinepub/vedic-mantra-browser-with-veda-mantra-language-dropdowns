@@ -2,12 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-deploy-the-application-frontend-backend-canisters-to-the-internet-computer-mainnet-so-it-is-publicly-accessible-without-local-tooling",
-      "featureTitle": "Deploy the application (frontend + backend canisters) to the Internet Computer mainnet so it is publicly accessible without local tooling.",
+      "featureId": "feature-ensure-the-samaveda-mantra-number-dropdown-includes-mantra-48-when-it-exists-in-backend-data-and-that-selecting-samaveda-shows-mantra-48-as-an-available-option",
+      "featureTitle": "Ensure the Samaveda mantra number dropdown includes Mantra 48 when it exists in backend data (and that selecting Samaveda shows Mantra 48 as an available option).",
       "files": [
-        "frontend/DEPLOYMENT.md",
-        "frontend/public/404.html",
-        "frontend/src/App.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -23,11 +22,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-provide-the-public-url-for-the-deployed-app-in-a-human-readable-form-within-the-repository-e-g-in-a-root-level-readme-and-ensure-it-matches-the-deployed-frontend-canister-url",
-      "featureTitle": "Provide the public URL for the deployed app in a human-readable form within the repository (e.g., in a root-level README) and ensure it matches the deployed frontend canister URL.",
+      "featureId": "feature-add-a-clearly-visible-add-button-in-the-ui-that-allows-the-user-to-open-the-mantra-content-submission-template-form-to-submit-the-next-mantra-content",
+      "featureTitle": "Add a clearly visible \"Add\" button in the UI that allows the user to open the mantra content submission template/form to submit the next mantra content.",
       "files": [
-        "frontend/DEPLOYMENT.md",
-        "frontend/README.md"
+        "frontend/src/App.tsx",
+        "frontend/src/components/MantraContentTemplate.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -43,11 +42,12 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-an-in-app-share-area-that-displays-the-current-page-url-and-allows-copying-it-to-the-clipboard-so-users-can-easily-share-the-publicly-accessible-link",
-      "featureTitle": "Add an in-app “Share” area that displays the current page URL and allows copying it to the clipboard, so users can easily share the publicly accessible link.",
+      "featureId": "feature-when-the-user-submits-a-mantra-content-template-for-a-mantra-number-that-is-not-currently-present-in-the-dropdown-for-that-veda-refresh-the-dropdown-so-the-newly-submitted-mantra-number-becomes-selectable-immediately",
+      "featureTitle": "When the user submits a mantra content template for a mantra number that is not currently present in the dropdown for that Veda, refresh the dropdown so the newly submitted mantra number becomes selectable immediately.",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/ShareArea.tsx"
+        "frontend/src/components/MantraContentTemplate.tsx",
+        "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",

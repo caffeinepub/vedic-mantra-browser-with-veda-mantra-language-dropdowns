@@ -1,68 +1,78 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T04:26:51.346Z",
-  "summary": "REQ-3 (in-app Share area with copy-to-clipboard and visible success state) appears implemented. REQ-1 (actual IC mainnet deployment with stable canister IDs) is not evidenced by the diff. REQ-2 (document exact public URL in a root-level README matching the deployed frontend canister) is not met: documentation is added under frontend/ and uses a placeholder URL.",
+  "generatedAt": "2026-02-09T14:24:23.614Z",
+  "summary": "REQ-2 and REQ-3 appear implemented on the frontend via an Add button that toggles the template editor and React Query invalidation/refetch behavior for mantra numbers after submission. REQ-1 is partially addressed by adding Samaveda mantra 48 data in the backend and updating the frontend to fetch a broader mantra-number list, but the diff summary does not clearly show that the backend function explicitly required by the AC (getMantraNumbers(Samaveda)) now returns 48.",
   "missing_requirements": [
     {
       "id": "REQ-1",
-      "requirement": "Deploy the application (frontend + backend canisters) to the Internet Computer mainnet so it is publicly accessible without local tooling, producing stable canister IDs.",
-      "reason": "The diff only adds/changes frontend code and documentation; it does not show any actual mainnet deployment artifacts (e.g., recorded mainnet canister IDs, deployment outputs, or configuration changes proving mainnet deployment).",
+      "requirement": "If the backend contains Samaveda mantra 48, the backend getMantraNumbers(Samaveda) response includes 48.",
+      "reason": "The diff shows Samaveda mantra 48 added to the backend data and the frontend switched to calling getAllMantraNumbersForVeda, but it does not show any change or evidence that the specific backend method getMantraNumbers(Samaveda) exists and/or returns 48 as required by the acceptance criteria.",
       "evidence": [
-        "frontend/DEPLOYMENT.md",
-        "frontend/README.md",
-        "project_state.json"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Provide the public URL for the deployed app in a human-readable form within the repository (e.g., in a root-level README) and ensure it matches the deployed frontend canister URL.",
-      "reason": "The documented URL is a placeholder (https://<frontend-canister-id>.icp0.io) and the README is not root-level (it is under frontend/). No exact deployed URL is provided.",
-      "evidence": [
-        "frontend/README.md"
+        "backend/main.mo",
+        "frontend/src/hooks/useQueries.ts"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added SPA deep-link fallback infrastructure via 404.html redirect and a static-hosting _redirects rule.",
-      "reason": "Not explicitly requested by the BuildRequest (though it may support deep-linking/deployment), and goes beyond the specified requirements.",
+      "description": "Internet Identity-gated audio upload/replace feature in the mantra audio section.",
+      "reason": "The request explicitly called out non-goals around auth providers and did not ask for any new audio upload/auth gating behavior; the diff summary describes a new authentication-gated audio upload/replace UI.",
       "evidence": [
+        "frontend/src/components/MantraAudioSection.tsx"
+      ]
+    },
+    {
+      "description": "SPA deep-link fallback infrastructure for static hosting (Netlify-style _redirects and a custom 404.html redirect preservation mechanism).",
+      "reason": "Not requested; this is additional routing/hosting behavior beyond the dropdown visibility and Add/template functionality.",
+      "evidence": [
+        "frontend/public/_redirects",
         "frontend/public/404.html",
-        "frontend-file-summaries.txt (mentions frontend/public/_redirects)"
+        "frontend/src/App.tsx"
       ]
     },
     {
-      "description": "UI theming and styling changes (new parchment-inspired palette, Tailwind token changes, metadata label emphasis styling).",
-      "reason": "Not requested by REQ-1/2/3; these are additional design/system changes unrelated to deploying and sharing a public URL.",
+      "description": "Share feature that shows current URL with copy-to-clipboard feedback.",
+      "reason": "Not requested in the BuildRequest.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/index.css, frontend/tailwind.config.js, frontend/src/components/MantraMetadataHeader.tsx)"
+        "frontend/src/components/ShareArea.tsx",
+        "frontend/src/App.tsx"
       ]
     },
     {
-      "description": "Data/UI behavior changes in hooks (de-duplicating and numerically sorting mantra numbers for stable dropdown options).",
-      "reason": "Not requested by REQ-1/2/3; this is additional functionality/behavior change.",
+      "description": "Large visual design/theme changes (new color palette and Tailwind token changes; metadata label styling changes).",
+      "reason": "Not requested; the BuildRequest focuses on dropdown content and Add/template behavior.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/hooks/useQueries.ts)"
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js",
+        "frontend/src/components/MantraMetadataHeader.tsx"
       ]
     },
     {
-      "description": "Added a separate deployment guide document under frontend/ (DEPLOYMENT.md) with extensive instructions and checklists.",
-      "reason": "REQ-2 asks for the public URL to be documented (e.g., in a root-level README) but does not request a new comprehensive deployment guide document.",
+      "description": "New build/deploy shell scripts and additional deployment documentation.",
+      "reason": "Not requested; operational tooling/documentation additions are outside the stated requirements.",
       "evidence": [
+        "frontend/scripts/build.sh",
+        "frontend/scripts/deploy-ic.sh",
         "frontend/DEPLOYMENT.md",
-        "frontend-file-summaries.txt (frontend/DEPLOYMENT.md)"
+        "frontend/README.md"
+      ]
+    },
+    {
+      "description": "New Select value guard utilities to coerce/validate controlled Select values.",
+      "reason": "Not explicitly requested as part of the dropdown Mantra 48 fix; it may be related, but it is an additional feature beyond the stated requirements.",
+      "evidence": [
+        "frontend/src/utils/selectValueGuards.ts"
       ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/DEPLOYMENT.md",
-    "frontend/README.md",
-    "frontend/public/404.html",
     "frontend/src/App.tsx",
-    "frontend/src/components/ShareArea.tsx",
+    "frontend/src/components/MantraContentTemplate.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]
 }

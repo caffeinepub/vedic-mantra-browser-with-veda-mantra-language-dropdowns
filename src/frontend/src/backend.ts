@@ -119,11 +119,14 @@ export interface backendInterface {
     _caffeineStorageRefillCashier(refillInformation: _CaffeineStorageRefillInformation | null): Promise<_CaffeineStorageRefillResult>;
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     addMantraAudioFile(veda: Veda, mantraNumber: bigint, blob: ExternalBlob): Promise<void>;
+    getAllMantraNumbersForVeda(veda: Veda): Promise<Array<bigint>>;
     getMantraAudioFile(veda: Veda, mantraNumber: bigint): Promise<ExternalBlob | null>;
     getMantraMeaning(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;
     getMantraMetadata(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;
     getMantraNumbers(veda: Veda): Promise<Array<bigint>>;
+    getMantraTemplate(veda: Veda, mantraNumber: bigint): Promise<string | null>;
     getMantraText(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;
+    submitTemplate(veda: Veda, mantraNumber: bigint, template: string): Promise<Array<bigint>>;
 }
 import type { ExternalBlob as _ExternalBlob, Language as _Language, Veda as _Veda, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -226,6 +229,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getAllMantraNumbersForVeda(arg0: Veda): Promise<Array<bigint>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllMantraNumbersForVeda(to_candid_Veda_n8(this._uploadFile, this._downloadFile, arg0));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllMantraNumbersForVeda(to_candid_Veda_n8(this._uploadFile, this._downloadFile, arg0));
+            return result;
+        }
+    }
     async getMantraAudioFile(arg0: Veda, arg1: bigint): Promise<ExternalBlob | null> {
         if (this.processError) {
             try {
@@ -282,6 +299,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getMantraTemplate(arg0: Veda, arg1: bigint): Promise<string | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getMantraTemplate(to_candid_Veda_n8(this._uploadFile, this._downloadFile, arg0), arg1);
+                return from_candid_opt_n15(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getMantraTemplate(to_candid_Veda_n8(this._uploadFile, this._downloadFile, arg0), arg1);
+            return from_candid_opt_n15(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getMantraText(arg0: Veda, arg1: bigint, arg2: Language): Promise<string | null> {
         if (this.processError) {
             try {
@@ -294,6 +325,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getMantraText(to_candid_Veda_n8(this._uploadFile, this._downloadFile, arg0), arg1, to_candid_Language_n13(this._uploadFile, this._downloadFile, arg2));
             return from_candid_opt_n15(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async submitTemplate(arg0: Veda, arg1: bigint, arg2: string): Promise<Array<bigint>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.submitTemplate(to_candid_Veda_n8(this._uploadFile, this._downloadFile, arg0), arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.submitTemplate(to_candid_Veda_n8(this._uploadFile, this._downloadFile, arg0), arg1, arg2);
+            return result;
         }
     }
 }

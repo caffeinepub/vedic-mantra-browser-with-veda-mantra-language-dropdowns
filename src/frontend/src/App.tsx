@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { BookOpen, Languages, Library, AlertCircle } from 'lucide-react';
 import { MantraMetadataHeader } from './components/MantraMetadataHeader';
 import { MantraAudioSection } from './components/MantraAudioSection';
+import { MantraContentTemplate } from './components/MantraContentTemplate';
 import { ShareArea } from './components/ShareArea';
 
 const VEDA_OPTIONS = [
@@ -62,8 +63,10 @@ function App() {
   const [selectedLanguageString, setSelectedLanguageString] = useState<string>('english');
   const [isDeepLinked, setIsDeepLinked] = useState<boolean>(false);
   const [hasAutoSelected, setHasAutoSelected] = useState<boolean>(false);
+  const [shorthandError, setShorthandError] = useState<string | null>(null);
+  const [showTemplateEditor, setShowTemplateEditor] = useState<boolean>(false);
 
-  // Parse deep link on initial load - support /<veda-slug>/<number>
+  // Parse deep link on initial load - support /<veda-slug>/<number> and /<number>
   useEffect(() => {
     // First check if we have a redirect query parameter from 404.html
     const urlParams = new URLSearchParams(window.location.search);
@@ -77,11 +80,11 @@ function App() {
     }
     
     // Match /<veda-slug>/:number with optional trailing slash, case-insensitive
-    const match = path.match(/^\/([a-z]+)\/(\d+)\/?$/i);
+    const fullMatch = path.match(/^\/([a-z]+)\/(\d+)\/?$/i);
     
-    if (match) {
-      const vedaSlug = match[1];
-      const mantraNumber = match[2];
+    if (fullMatch) {
+      const vedaSlug = fullMatch[1];
+      const mantraNumber = fullMatch[2];
       const vedaStr = slugToVedaString(vedaSlug);
       
       if (vedaStr) {
@@ -90,7 +93,26 @@ function App() {
         setSelectedLanguageString('english');
         setIsDeepLinked(true);
         setHasAutoSelected(true);
+        return;
       }
+    }
+    
+    // Match shorthand /<number> with optional trailing slash
+    const shorthandMatch = path.match(/^\/(\d+)\/?$/);
+    
+    if (shorthandMatch) {
+      const mantraNumber = shorthandMatch[1];
+      
+      // Default to Samaveda + English for shorthand links
+      setSelectedVedaString('samaVeda');
+      setSelectedMantraString(mantraNumber);
+      setSelectedLanguageString('english');
+      setIsDeepLinked(true);
+      setHasAutoSelected(true);
+      
+      // Normalize URL to canonical form /samaveda/<number>
+      const canonicalPath = `/samaveda/${mantraNumber}`;
+      window.history.replaceState({}, '', canonicalPath);
     }
   }, []);
 
@@ -162,6 +184,34 @@ function App() {
     });
   }, [mantraNumbers]);
 
+  // Dev-only verification: Check if Mantra 48 is present for Samaveda
+  useEffect(() => {
+    if (import.meta.env.DEV && selectedVedaString === 'samaVeda' && !isLoadingNumbers && uniqueSortedMantraNumbers.length > 0) {
+      const hasMantra48 = uniqueSortedMantraNumbers.some(num => num === 48n);
+      if (!hasMantra48) {
+        console.warn('[DEV] Mantra 48 is missing from Samaveda numbers list. Expected mantras:', uniqueSortedMantraNumbers.map(n => n.toString()));
+      } else {
+        console.log('[DEV] Mantra 48 is present in Samaveda numbers list.');
+      }
+    }
+  }, [selectedVedaString, uniqueSortedMantraNumbers, isLoadingNumbers]);
+
+  // Check for shorthand error: mantra not available for Samaveda
+  useEffect(() => {
+    if (isDeepLinked && selectedVedaString === 'samaVeda' && selectedMantraString && !isLoadingNumbers) {
+      const requestedMantra = BigInt(selectedMantraString);
+      const isAvailable = uniqueSortedMantraNumbers.some(num => num === requestedMantra);
+      
+      if (!isAvailable && uniqueSortedMantraNumbers.length > 0) {
+        setShorthandError(
+          `Mantra ${selectedMantraString} is not available for Samaveda. Please select from the available mantras.`
+        );
+      } else {
+        setShorthandError(null);
+      }
+    }
+  }, [isDeepLinked, selectedVedaString, selectedMantraString, uniqueSortedMantraNumbers, isLoadingNumbers]);
+
   // Fetch metadata for selected combination
   const { data: metadata, isFetching: isFetchingMetadata, error: metadataError } = useMantraMetadata(
     selectedVeda,
@@ -188,6 +238,7 @@ function App() {
     setSelectedVedaString(value);
     setSelectedMantraString(''); // Reset to empty string immediately to clear stale content
     setIsDeepLinked(false);
+    setShorthandError(null);
   };
 
   // Handle Language change: ensure UI updates immediately
@@ -214,349 +265,226 @@ function App() {
         setSelectedMantraString(uniqueSortedMantraNumbers[0].toString());
       }
     }
-  }, [uniqueSortedMantraNumbers, isDeepLinked, selectedMantra, selectedMantraString]);
+  }, [uniqueSortedMantraNumbers, selectedMantraString, isDeepLinked, selectedMantra]);
 
-  // Sync URL when user changes selection
-  useEffect(() => {
-    if (selectedMantra > 0n && selectedVedaString) {
-      const slug = vedaStringToSlug(selectedVedaString);
-      const newPath = `/${slug}/${selectedMantra.toString()}`;
-      
-      // Only update if path changed to avoid infinite loops
-      if (window.location.pathname !== newPath) {
-        window.history.pushState({}, '', newPath);
-      }
-    }
-  }, [selectedVedaString, selectedMantra]);
-
-  const vedaLabel = VEDA_OPTIONS.find(v => v.value === selectedVedaString)?.label || '';
-  const languageLabel = LANGUAGE_OPTIONS.find(l => l.value === selectedLanguageString)?.label || '';
-
-  // Helper function to check if text is valid (not null, not empty, not just whitespace)
-  const hasValidText = (text: string | null | undefined): boolean => {
-    return !!text && text.trim().length > 0;
+  // Handle mantra selection change
+  const handleMantraChange = (value: string) => {
+    setSelectedMantraString(value);
+    setIsDeepLinked(false);
+    setShorthandError(null);
+    
+    // Update URL to reflect selection
+    const slug = vedaStringToSlug(selectedVedaString);
+    const newPath = `/${slug}/${value}`;
+    window.history.pushState({}, '', newPath);
   };
 
-  // Check if we should show the audio section (Samaveda, Mantra 47)
-  const shouldShowAudio = selectedVeda === Veda.samaVeda && selectedMantra === 47n;
+  // Determine if we have valid content to display
+  const hasValidContent = selectedMantra > 0n && (mantraText || meaning || metadata);
+  const isLoading = isFetchingText || isFetchingMeaning || isFetchingMetadata;
 
-  // Check if selected mantra value is valid in current options
-  const isMantraValueValid = selectedMantraString && uniqueSortedMantraNumbers.some(
-    num => num.toString() === selectedMantraString
-  );
-
-  // Diagnostic: Check if we have a mismatch
-  const showMantraMismatchDiagnostic = selectedMantraString && !isMantraValueValid && !isLoadingNumbers;
-
-  // Samaveda-specific diagnostic: Check if 47 is missing
-  const isSamavedaSelected = selectedVedaString === 'samaVeda';
-  const samaveda47Missing = isSamavedaSelected && 
-    !isLoadingNumbers && 
-    uniqueSortedMantraNumbers.length > 0 && 
-    !uniqueSortedMantraNumbers.some(num => num === 47n);
+  // Check if any query returned an error
+  const hasError = textError || meaningError || metadataError || numbersError;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 relative overflow-hidden">
-      {/* Background image with overlay */}
-      <div 
-        className="fixed inset-0 opacity-[0.03] bg-cover bg-center bg-no-repeat pointer-events-none"
-        style={{ backgroundImage: 'url(/assets/generated/vedic-bg.dim_1920x1080.png)' }}
-      />
-      <div className="fixed inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80 pointer-events-none" />
-
-      {/* Content */}
-      <div className="relative z-10">
-        {/* Header */}
-        <header className="border-b border-border/40 bg-card/50 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Header */}
+      <header className="border-b border-border/40 bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <BookOpen className="h-8 w-8 text-primary" />
-              </div>
+              <BookOpen className="h-8 w-8 text-primary" />
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                  Vedic Mantra Browser
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Explore ancient wisdom across Vedas and languages
-                </p>
+                <h1 className="text-2xl font-bold text-foreground">Vedic Mantra Browser</h1>
+                <p className="text-sm text-muted-foreground">Explore ancient wisdom</p>
               </div>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Main Content */}
-        <main className="container mx-auto px-4 py-8 max-w-5xl">
-          {/* Selection Controls */}
-          <Card className="mb-8 shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Select Mantra</CardTitle>
-              <CardDescription>
-                Choose a Veda, mantra number, and language to view the text and meaning
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Veda Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="veda-select" className="flex items-center gap-2 text-sm font-medium">
-                    <Library className="h-4 w-4 text-primary" />
-                    Veda
-                  </Label>
-                  <Select
-                    value={selectedVedaString}
-                    onValueChange={handleVedaChange}
-                  >
-                    <SelectTrigger id="veda-select" className="w-full">
-                      <SelectValue placeholder="Select a Veda" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {VEDA_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Mantra Number Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="mantra-select" className="flex items-center gap-2 text-sm font-medium">
-                    <BookOpen className="h-4 w-4 text-primary" />
-                    Mantra Number
-                  </Label>
-                  <Select
-                    value={selectedMantraString}
-                    onValueChange={(value) => {
-                      setSelectedMantraString(value);
-                      setIsDeepLinked(false);
-                    }}
-                    disabled={isLoadingNumbers || uniqueSortedMantraNumbers.length === 0}
-                  >
-                    <SelectTrigger id="mantra-select" className="w-full">
-                      <SelectValue placeholder={isLoadingNumbers ? "Loading..." : "Select mantra"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {uniqueSortedMantraNumbers.map((num) => (
-                        <SelectItem key={num.toString()} value={num.toString()}>
-                          {num.toString()}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Diagnostic: Empty mantra numbers */}
-                  {uniqueSortedMantraNumbers.length === 0 && !isLoadingNumbers && selectedVedaString && (
-                    <Alert className="mt-2">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        No mantras are available for <strong>{vedaLabel}</strong>.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  {/* Samaveda-specific diagnostic: 47 is missing */}
-                  {samaveda47Missing && (
-                    <Alert variant="destructive" className="mt-2">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        <strong>Warning:</strong> Mantra 47 is missing from Samaveda. 
-                        Available options: {uniqueSortedMantraNumbers.map(n => n.toString()).join(', ')}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  {/* Diagnostic: Mantra value mismatch */}
-                  {showMantraMismatchDiagnostic && !samaveda47Missing && (
-                    <Alert className="mt-2">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        Selected mantra value "{selectedMantraString}" is not in the loaded options for <strong>{vedaLabel}</strong>. 
-                        Available: {uniqueSortedMantraNumbers.map(n => n.toString()).join(', ') || 'none'}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                </div>
-
-                {/* Language Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="language-select" className="flex items-center gap-2 text-sm font-medium">
-                    <Languages className="h-4 w-4 text-primary" />
-                    Language
-                  </Label>
-                  <Select
-                    value={selectedLanguageString}
-                    onValueChange={handleLanguageChange}
-                  >
-                    <SelectTrigger id="language-select" className="w-full">
-                      <SelectValue placeholder="Select a language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGE_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8 space-y-6">
+        {/* Selection Controls */}
+        <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Library className="h-5 w-5" />
+              Select Mantra
+            </CardTitle>
+            <CardDescription>Choose a Veda, mantra number, and language</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Veda Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="veda-select">Veda</Label>
+                <Select value={selectedVedaString} onValueChange={handleVedaChange}>
+                  <SelectTrigger id="veda-select">
+                    <SelectValue placeholder="Select a Veda" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VEDA_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Share Area */}
-          {selectedMantra > 0n && selectedVedaString && (
-            <ShareArea />
-          )}
+              {/* Mantra Number Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="mantra-select">Mantra Number</Label>
+                <Select
+                  value={selectedMantraString}
+                  onValueChange={handleMantraChange}
+                  disabled={!selectedVedaString || isLoadingNumbers}
+                >
+                  <SelectTrigger id="mantra-select">
+                    <SelectValue placeholder={isLoadingNumbers ? 'Loading...' : 'Select a mantra'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {uniqueSortedMantraNumbers.map((num) => (
+                      <SelectItem key={num.toString()} value={num.toString()}>
+                        Mantra {num.toString()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {/* Mantra Text Display */}
-          <Card className="mb-8 shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">
-                {vedaLabel} - Mantra {selectedMantra > 0n ? selectedMantra.toString() : '—'}
-              </CardTitle>
-              <CardDescription>
-                Text in {languageLabel}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {numbersError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Error loading mantra numbers. Please try again.
-                  </AlertDescription>
-                </Alert>
-              )}
+              {/* Language Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="language-select" className="flex items-center gap-2">
+                  <Languages className="h-4 w-4" />
+                  Language
+                </Label>
+                <Select value={selectedLanguageString} onValueChange={handleLanguageChange}>
+                  <SelectTrigger id="language-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-              {textError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Error loading mantra text. Please try again.
-                  </AlertDescription>
-                </Alert>
-              )}
+        {/* Error Display */}
+        {shorthandError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{shorthandError}</AlertDescription>
+          </Alert>
+        )}
 
-              {metadataError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Error loading mantra metadata. Please try again.
-                  </AlertDescription>
-                </Alert>
-              )}
+        {hasError && !shorthandError && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load mantra content. Please try again or select a different mantra.
+            </AlertDescription>
+          </Alert>
+        )}
 
-              {/* Show loading state during fetch */}
-              {(isFetchingMetadata || isFetchingText) && selectedMantra > 0n && (
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-4/5" />
-                </div>
-              )}
+        {/* Mantra Content Display */}
+        {selectedVedaString && selectedMantraString && !shorthandError && (
+          <>
+            {isLoading ? (
+              <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardHeader>
+                  <Skeleton className="h-6 w-48" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-32 w-full" />
+                  <Skeleton className="h-32 w-full" />
+                </CardContent>
+              </Card>
+            ) : hasValidContent ? (
+              <>
+                {/* Metadata Header */}
+                {metadata && <MantraMetadataHeader metadata={metadata} />}
 
-              {/* Show metadata if available */}
-              {!isFetchingMetadata && hasValidText(metadata) && (
-                <MantraMetadataHeader metadata={metadata!} />
-              )}
+                {/* Mantra Text */}
+                {mantraText && (
+                  <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle>Mantra Text</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-lg leading-relaxed whitespace-pre-wrap text-foreground">
+                        {mantraText}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
 
-              {/* Show text if available */}
-              {!isFetchingText && hasValidText(mantraText) && (
-                <div className="prose prose-lg max-w-none mt-4">
-                  <p className="whitespace-pre-wrap text-foreground leading-relaxed">
-                    {mantraText}
-                  </p>
-                </div>
-              )}
+                {/* Meaning */}
+                {meaning && (
+                  <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle>Meaning</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-base leading-relaxed whitespace-pre-wrap text-muted-foreground">
+                        {meaning}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
 
-              {/* Show message if no text available */}
-              {!isFetchingText && !hasValidText(mantraText) && selectedMantra > 0n && (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    No text available for this mantra in {languageLabel}.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
+                {/* Audio Section */}
+                <MantraAudioSection veda={selectedVeda} mantraNumber={selectedMantra} />
 
-          {/* Mantra Meaning Display */}
-          <Card className="mb-8 shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-xl">Meaning</CardTitle>
-              <CardDescription>
-                Interpretation in {languageLabel}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {meaningError && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Error loading mantra meaning. Please try again.
-                  </AlertDescription>
-                </Alert>
-              )}
+                {/* Share Area */}
+                <ShareArea />
+              </>
+            ) : (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  No content available for this mantra yet. You can add content using the template editor below.
+                </AlertDescription>
+              </Alert>
+            )}
+          </>
+        )}
 
-              {/* Show loading state during fetch */}
-              {isFetchingMeaning && selectedMantra > 0n && (
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-5/6" />
-                  <Skeleton className="h-4 w-4/5" />
-                </div>
-              )}
+        {/* Mantra Content Template - Always visible in production with Add button */}
+        {selectedVedaString && selectedMantraString && !shorthandError && (
+          <MantraContentTemplate
+            veda={selectedVeda}
+            mantraNumber={selectedMantra}
+            isOpen={showTemplateEditor}
+            onOpenChange={setShowTemplateEditor}
+          />
+        )}
+      </main>
 
-              {/* Show meaning if available */}
-              {!isFetchingMeaning && hasValidText(meaning) && (
-                <div className="prose prose-lg max-w-none">
-                  <p className="whitespace-pre-wrap text-foreground leading-relaxed">
-                    {meaning}
-                  </p>
-                </div>
-              )}
-
-              {/* Show message if no meaning available */}
-              {!isFetchingMeaning && !hasValidText(meaning) && selectedMantra > 0n && (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    No meaning available for this mantra in {languageLabel}.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Audio Section - Only for Samaveda Mantra 47 */}
-          {shouldShowAudio && (
-            <MantraAudioSection
-              veda={selectedVeda}
-              mantraNumber={selectedMantra}
-            />
-          )}
-        </main>
-
-        {/* Footer */}
-        <footer className="border-t border-border/40 bg-card/50 backdrop-blur-sm mt-16">
-          <div className="container mx-auto px-4 py-6">
-            <p className="text-center text-sm text-muted-foreground">
-              © 2026. Built with love using{' '}
-              <a
-                href="https://caffeine.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                caffeine.ai
-              </a>
-            </p>
-          </div>
-        </footer>
-      </div>
+      {/* Footer */}
+      <footer className="border-t border-border/40 bg-card/50 backdrop-blur-sm mt-16">
+        <div className="container mx-auto px-4 py-6">
+          <p className="text-center text-sm text-muted-foreground">
+            © 2026. Built with love using{' '}
+            <a
+              href="https://caffeine.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              caffeine.ai
+            </a>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

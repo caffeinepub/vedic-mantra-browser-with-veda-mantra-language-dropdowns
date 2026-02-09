@@ -17,9 +17,7 @@ This guide explains how to deploy the Vedic Mantra Browser to the Internet Compu
 
 ## Deployment Steps
 
-### 1. Configure for Mainnet
+### 1. Configure Your Identity
 
-Ensure your `dfx.json` is configured correctly. The default configuration should work for mainnet deployment.
-
-### 2. Create Mainnet Identity (if needed)
+Create or select a dfx identity for mainnet deployment:
 

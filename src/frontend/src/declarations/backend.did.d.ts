@@ -46,11 +46,14 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   'addMantraAudioFile' : ActorMethod<[Veda, bigint, ExternalBlob], undefined>,
+  'getAllMantraNumbersForVeda' : ActorMethod<[Veda], Array<bigint>>,
   'getMantraAudioFile' : ActorMethod<[Veda, bigint], [] | [ExternalBlob]>,
   'getMantraMeaning' : ActorMethod<[Veda, bigint, Language], [] | [string]>,
   'getMantraMetadata' : ActorMethod<[Veda, bigint, Language], [] | [string]>,
   'getMantraNumbers' : ActorMethod<[Veda], Array<bigint>>,
+  'getMantraTemplate' : ActorMethod<[Veda, bigint], [] | [string]>,
   'getMantraText' : ActorMethod<[Veda, bigint, Language], [] | [string]>,
+  'submitTemplate' : ActorMethod<[Veda, bigint, string], Array<bigint>>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

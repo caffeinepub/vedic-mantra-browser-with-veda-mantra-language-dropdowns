@@ -1,11 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Deploy the app to the Internet Computer (IC) mainnet and make it publicly accessible via a stable URL.
+**Goal:** Make Samaveda Mantra 48 selectable when present, and add an “Add” button to open a mantra submission template that refreshes the dropdown after successful submission.
 
 **Planned changes:**
-- Deploy both frontend and backend canisters to the IC mainnet with stable canister IDs.
-- Add a root-level README (or equivalent) that documents the exact public URL for the deployed frontend canister.
-- Add an in-app “Share” area that shows the current full page URL (including selected Veda/mantra path when present) and provides a copy-to-clipboard action with a visible English success state.
+- Fix mantra number retrieval/mapping so Samaveda’s Mantra Number dropdown includes “Mantra 48” when it exists in backend data, and selecting it routes to `/samaveda/48` and loads its content.
+- Add a production-visible “Add” button near the mantra selection UI that opens the mantra content submission template/form only when clicked, with a close action that returns to the main view without changing the current selection.
+- After a successful submission (especially for a new mantra number not previously listed), refresh the mantra numbers for the currently selected Veda so the new number appears immediately in the dropdown; ensure validation/error messages during submission are in English.
 
-**User-visible outcome:** Anyone can open the app from a standard browser using the documented public URL, and users can copy/share the current page link directly from within the app.
+**User-visible outcome:** Users can select “Mantra 48” for Samaveda when available, open a submission template via an “Add” button to submit the next mantra content, and see newly added mantra numbers appear in the dropdown right after submission without a hard refresh.

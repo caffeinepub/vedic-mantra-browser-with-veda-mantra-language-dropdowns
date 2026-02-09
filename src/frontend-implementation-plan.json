@@ -1,72 +1,73 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Mainnet-ready IC deployment docs + in-app share link",
+  "title": "Fix Samaveda Mantra 48 dropdown visibility and add production Add button to open submission template",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Make the SPA routing and deep links work reliably when deployed to IC mainnet (public access without local tooling).",
+      "summary": "Ensure Samaveda mantra numbers dropdown reflects backend data (including Mantra 48) and selection deep-links to /samaveda/48.",
       "acceptanceCriteria": [
-        "The app is deployed to the IC mainnet (not local replica).",
-        "A user can access the app from a standard browser on a separate network/machine without any local build steps.",
-        "The deployment produces stable canister IDs for both frontend and backend canisters."
+        "When Veda = Samaveda, the Mantra Number dropdown includes an option labeled \"Mantra 48\".",
+        "Selecting \"Mantra 48\" updates the URL to /samaveda/48 and loads the corresponding content if available.",
+        "If the backend contains Samaveda mantra 48, the backend getMantraNumbers(Samaveda) response includes 48."
       ],
       "file_operations": [
         {
-          "path": "frontend/public/404.html",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update the SPA fallback behavior for IC static hosting so unknown paths redirect to the app entry while preserving the originally requested path (so deep links like /rigveda/10 still load correctly after mainnet deployment)."
+          "description": "Adjust the mantra numbers query to use the backend capability that returns the complete set of available mantra numbers for a Veda (so Samaveda includes 48 when present), while preserving numeric sort + de-duplication. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Handle the preserved deep-link redirect from the SPA fallback (e.g., query parameter from 404.html) by restoring the intended path before the existing deep-link parsing runs, ensuring routing works on IC mainnet refresh and direct link visits."
-        },
-        {
-          "path": "frontend/DEPLOYMENT.md",
-          "operation": "create",
-          "description": "Add IC mainnet deployment documentation (frontend + backend canisters) focusing on producing stable canister IDs and a publicly accessible URL; include where to record the resulting canister IDs/URLs after deployment."
+          "description": "Ensure the Mantra Number dropdown renders all returned numbers (including 48) and that selecting a number reliably syncs the URL to the canonical /<veda-slug>/<number> path (e.g., /samaveda/48). Keep user-facing messaging in English. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Document the deployed public URL in-repo so it matches the deployed frontend canister URL.",
+      "summary": "Add a production-visible Add button near mantra selection that opens the mantra submission template/form on demand.",
       "acceptanceCriteria": [
-        "A root-level README (or equivalent project documentation file) includes the exact public URL to access the app.",
-        "The documented URL loads the deployed app successfully and shows the SPA (not a 404)."
+        "An \"Add\" button is visible in production builds (not only in development) and is discoverable near the mantra selection area.",
+        "Clicking \"Add\" opens the mantra content template/form (it is not shown until the user clicks \"Add\").",
+        "Closing the template/form returns the user to the main view without changing the current mantra selection."
       ],
       "file_operations": [
         {
-          "path": "frontend/README.md",
-          "operation": "create",
-          "description": "Create a human-readable documentation file that includes the exact public URL for the deployed frontend canister (and optionally backend canister ID) and notes that the URL must be updated to match the mainnet deployment result."
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add a clearly visible \"Add\" button near the selection controls and wire it to open/close the mantra submission template without changing the current Veda/mantra selection. Remove/relax the current production gating so this workflow is available in production builds. Use the shadcn-ui Button component for consistent styling; verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/DEPLOYMENT.md",
+          "path": "frontend/src/components/MantraContentTemplate.tsx",
           "operation": "modify",
-          "description": "Reference the documentation location for the public URL and add a reminder to keep the documented URL synchronized with the deployed frontend canister URL."
+          "description": "Refactor the template UI to support being opened/closed by the parent (App) and to start closed by default; keep Close behavior returning to the main view without side effects. Ensure all user-facing text remains English. Use shadcn-ui Card/Button/Alert/Textarea components as already present; verify the component's usage instructions before implementing."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Add an in-app Share area that shows the current page URL and supports copying it to clipboard with an English success state.",
+      "summary": "After successful template submission for a new mantra number, refresh the mantra numbers list so the new number is immediately selectable.",
       "acceptanceCriteria": [
-        "The UI shows the current full URL (including the selected Veda/mantra path when present).",
-        "A copy action copies the URL to clipboard and provides a visible success state in English.",
-        "The feature works in modern browsers without requiring authentication."
+        "Submitting the template successfully triggers a refresh of the mantra numbers list for the currently selected Veda.",
+        "After successful submission for a new mantra number (e.g., 48), that number appears in the Mantra Number dropdown without requiring a hard refresh.",
+        "All validation and error messages shown to the user during submission are in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ShareArea.tsx",
-          "operation": "create",
-          "description": "Create a ShareArea component that displays the current full URL and provides a copy-to-clipboard action with a visible English success state. Use shadcn-ui components (e.g., Button/Card/Label where appropriate) to match the app styling; verify the component's usage instructions before implementing."
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Ensure the template submission mutation triggers a post-submit refresh of the mantra numbers query for the relevant Veda (and any other dependent cached queries) so new mantra numbers become selectable immediately. Keep errors surfaced to the UI in English. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/MantraContentTemplate.tsx",
+          "operation": "modify",
+          "description": "On successful submission, ensure the UI clearly indicates success in English and closes/returns control without changing the current selection, while relying on query invalidation to refresh the dropdown. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire ShareArea into the main UI (non-authenticated area) and ensure the displayed URL reflects the current selection-based route (e.g., /<veda-slug>/<number>) and updates as selections change."
+          "description": "Wire the post-submit refresh behavior into the selection experience by ensuring the dropdown list updates immediately when the underlying query refreshes, without requiring a full page reload. Verify the component's usage instructions before implementing."
         }
       ]
     }

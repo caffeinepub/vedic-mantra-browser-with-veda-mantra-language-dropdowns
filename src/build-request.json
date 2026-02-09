@@ -1,70 +1,72 @@
 {
   "kind": "build_request",
-  "title": "Publish the app and provide a publicly accessible URL",
+  "title": "Fix Mantra 48 visibility in dropdown and add an Add button that opens the mantra submission template",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Deploy the application (frontend + backend canisters) to the Internet Computer mainnet so it is publicly accessible without local tooling.",
+      "text": "Ensure the Samaveda mantra number dropdown includes Mantra 48 when it exists in backend data (and that selecting Samaveda shows Mantra 48 as an available option).",
       "target": "both",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "Please  publish  and provide the url, so that it can be viewed by everyone"
+          "Not seeing 48 mantra in the dropdown;"
         ]
       },
       "acceptanceCriteria": [
-        "The app is deployed to the IC mainnet (not local replica).",
-        "A user can access the app from a standard browser on a separate network/machine without any local build steps.",
-        "The deployment produces stable canister IDs for both frontend and backend canisters."
+        "When Veda = Samaveda, the Mantra Number dropdown includes an option labeled \"Mantra 48\".",
+        "Selecting \"Mantra 48\" updates the URL to /samaveda/48 and loads the corresponding content if available.",
+        "If the backend contains Samaveda mantra 48, the backend getMantraNumbers(Samaveda) response includes 48."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Provide the public URL for the deployed app in a human-readable form within the repository (e.g., in a root-level README) and ensure it matches the deployed frontend canister URL.",
+      "text": "Add a clearly visible \"Add\" button in the UI that allows the user to open the mantra content submission template/form to submit the next mantra content.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "provide the url, so that it can be viewed by everyone"
+          "There should be a add button. When I click the add button the template should open so that I can submit the next mantra content"
         ]
       },
       "acceptanceCriteria": [
-        "A root-level README (or equivalent project documentation file) includes the exact public URL to access the app.",
-        "The documented URL loads the deployed app successfully and shows the SPA (not a 404)."
+        "An \"Add\" button is visible in production builds (not only in development) and is discoverable near the mantra selection area.",
+        "Clicking \"Add\" opens the mantra content template/form (it is not shown until the user clicks \"Add\").",
+        "Closing the template/form returns the user to the main view without changing the current mantra selection."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add an in-app “Share” area that displays the current page URL and allows copying it to the clipboard, so users can easily share the publicly accessible link.",
-      "target": "frontend",
+      "text": "When the user submits a mantra content template for a mantra number that is not currently present in the dropdown for that Veda, refresh the dropdown so the newly submitted mantra number becomes selectable immediately.",
+      "target": "both",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "provide the url"
+          "...submit the next mantra content"
         ]
       },
       "acceptanceCriteria": [
-        "The UI shows the current full URL (including the selected Veda/mantra path when present).",
-        "A copy action copies the URL to clipboard and provides a visible success state in English.",
-        "The feature works in modern browsers without requiring authentication."
+        "Submitting the template successfully triggers a refresh of the mantra numbers list for the currently selected Veda.",
+        "After successful submission for a new mantra number (e.g., 48), that number appears in the Mantra Number dropdown without requiring a hard refresh.",
+        "All validation and error messages shown to the user during submission are in English."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain single-actor (all Motoko logic in backend/main.mo).",
-    "Do not modify files under frontend/src/components/ui or other immutablePaths; compose existing UI components instead."
+    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
+    "Do not edit files under frontend/src/components/ui or any other immutable frontend paths listed in SYSTEM_CONTEXT.",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Adding third-party hosting (AWS/Vercel/Netlify) or non-IC deployment targets.",
-    "Adding non-Internet-Identity authentication methods.",
-    "Changing mantra content/data unless required for deployment stability."
+    "Adding third-party authentication providers (only Internet Identity is allowed).",
+    "Adding real-time updates via WebSockets or push notifications.",
+    "Introducing external databases or off-canister storage beyond what is already used."
   ],
   "imageRequirements": {
     "required": [],
@@ -73,9 +75,7 @@
   "userProfileUpdate": {
     "goalsToAdd": [],
     "goalsToRemove": [],
-    "preferencesToAdd": [
-      "User-facing text must be in English."
-    ],
+    "preferencesToAdd": [],
     "preferencesToRemove": [],
     "miscToAdd": [],
     "miscToRemove": [],

@@ -1,30 +1,33 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "New project",
+  "summary": "Project involves a mantra dropdown/list where mantra 48 should appear, and an Add button that opens a submission template to add the next mantra content.",
   "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Mantra 48 not appearing in the dropdown as expected",
+    "Previous build attempt failed / request could not be completed"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-deploy-the-application-frontend-backend-canisters-to-the-internet-computer-mainnet-so-it-is-publicly-accessible-without-local-tooling",
-      "title": "Deploy the application (frontend + backend canisters) to the Internet Computer mainnet so it is publicly accessible without local tooling.",
+      "id": "feature-ensure-the-samaveda-mantra-number-dropdown-includes-mantra-48-when-it-exists-in-backend-data-and-that-selecting-samaveda-shows-mantra-48-as-an-available-option",
+      "title": "Ensure the Samaveda mantra number dropdown includes Mantra 48 when it exists in backend data (and that selecting Samaveda shows Mantra 48 as an available option).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-provide-the-public-url-for-the-deployed-app-in-a-human-readable-form-within-the-repository-e-g-in-a-root-level-readme-and-ensure-it-matches-the-deployed-frontend-canister-url",
-      "title": "Provide the public URL for the deployed app in a human-readable form within the repository (e.g., in a root-level README) and ensure it matches the deployed frontend canister URL.",
+      "id": "feature-add-a-clearly-visible-add-button-in-the-ui-that-allows-the-user-to-open-the-mantra-content-submission-template-form-to-submit-the-next-mantra-content",
+      "title": "Add a clearly visible \"Add\" button in the UI that allows the user to open the mantra content submission template/form to submit the next mantra content.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-an-in-app-share-area-that-displays-the-current-page-url-and-allows-copying-it-to-the-clipboard-so-users-can-easily-share-the-publicly-accessible-link",
-      "title": "Add an in-app “Share” area that displays the current page URL and allows copying it to the clipboard, so users can easily share the publicly accessible link.",
+      "id": "feature-when-the-user-submits-a-mantra-content-template-for-a-mantra-number-that-is-not-currently-present-in-the-dropdown-for-that-veda-refresh-the-dropdown-so-the-newly-submitted-mantra-number-becomes-selectable-immediately",
+      "title": "When the user submits a mantra content template for a mantra number that is not currently present in the dropdown for that Veda, refresh the dropdown so the newly submitted mantra number becomes selectable immediately.",
       "reqIds": [
         "REQ-3"
       ],
@@ -34,12 +37,18 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Publish the app and provide a publicly accessible URL for everyone to view",
+      "summary": "Ensure mantra dropdown displays mantra 48 as expected",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Add an Add button; clicking it opens a template/form to submit the next mantra content",
       "reqIds": [],
       "status": "pending"
     }
   ],
-  "projectName": "Publish the app and provide a publicly accessible URL",
+  "projectName": "Fix Mantra 48 visibility in dropdown and add an Add button that opens the mantra submission template",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

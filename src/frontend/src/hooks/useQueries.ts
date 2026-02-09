@@ -4,6 +4,7 @@ import { Veda, Language, ExternalBlob } from '../backend';
 
 /**
  * Hook to fetch available mantra numbers for a given Veda
+ * Uses getAllMantraNumbersForVeda to include both complete mantras and template-only entries
  */
 export function useMantraNumbers(veda: Veda) {
   const { actor, isFetching: isActorFetching } = useActor();
@@ -12,7 +13,7 @@ export function useMantraNumbers(veda: Veda) {
     queryKey: ['mantraNumbers', veda],
     queryFn: async () => {
       if (!actor) return [];
-      const numbers = await actor.getMantraNumbers(veda);
+      const numbers = await actor.getAllMantraNumbersForVeda(veda);
       
       // Sort ascending numerically
       const sorted = numbers.sort((a, b) => {
@@ -36,7 +37,10 @@ export function useMantraNumbers(veda: Veda) {
       return unique;
     },
     enabled: !!actor && !isActorFetching,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 0, // Always fetch fresh data to ensure newly added mantras appear
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when network reconnects
   });
 }
 
@@ -156,6 +160,68 @@ export function useUploadMantraAudio() {
       console.error('Audio upload failed:', error);
       throw new Error(
         error.message || 'Failed to upload audio. Please check your file and try again.'
+      );
+    },
+  });
+}
+
+/**
+ * Hook to fetch saved mantra template for a given Veda and mantra number
+ */
+export function useMantraTemplate(veda: Veda, mantraNumber: bigint) {
+  const { actor, isFetching: isActorFetching } = useActor();
+
+  return useQuery<string | null>({
+    queryKey: ['mantraTemplate', veda, mantraNumber.toString()],
+    queryFn: async () => {
+      if (!actor) return null;
+      const result = await actor.getMantraTemplate(veda, mantraNumber);
+      return result || null;
+    },
+    enabled: !!actor && !isActorFetching && mantraNumber > 0n,
+    staleTime: 0,
+    gcTime: 0,
+    placeholderData: undefined,
+  });
+}
+
+/**
+ * Hook to submit/save mantra template
+ */
+export function useSubmitMantraTemplate() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      veda,
+      mantraNumber,
+      template,
+    }: {
+      veda: Veda;
+      mantraNumber: bigint;
+      template: string;
+    }) => {
+      if (!actor) {
+        throw new Error('Backend actor is not available. Please try again.');
+      }
+      await actor.submitTemplate(veda, mantraNumber, template);
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate the template query to refetch the newly saved template
+      queryClient.invalidateQueries({
+        queryKey: ['mantraTemplate', variables.veda, variables.mantraNumber.toString()],
+      });
+      
+      // Invalidate the mantra numbers query to refresh the dropdown
+      queryClient.invalidateQueries({
+        queryKey: ['mantraNumbers', variables.veda],
+      });
+    },
+    onError: (error: Error) => {
+      console.error('Template submission failed:', error);
+      throw new Error(
+        error.message || 'Failed to submit template. Please try again.'
       );
     },
   });
