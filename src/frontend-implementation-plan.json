@@ -1,0 +1,39 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Display mantra text translated per selected language (Samaveda 47) — Frontend",
+  "requirements": [
+    {
+      "id": "REQ-14",
+      "summary": "Fetch and render the selected mantra text in the selected language and show it above the meaning in the existing single-page UI.",
+      "acceptanceCriteria": [
+        "When the user selects Samaveda + 47 and switches Language between Telugu/English/Hindi, the displayed mantra text changes accordingly without a page reload.",
+        "The meaning section continues to behave as it does today (still fetched by the existing meaning query) and remains visible below the mantra text.",
+        "Deep linking to /samveda/47 (or /samaveda/47) still auto-selects Samaveda and mantra 47, and the page shows both the mantra text and meaning for the selected (or default) language.",
+        "All user-facing UI strings introduced/modified for this change are in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Integrate mantra text rendering into the existing page: call the new React Query hook for mantra text keyed by (selectedVeda, selectedMantra, selectedLanguage), and render the mantra text section above the existing meaning section. Reuse existing shadcn/ui composition (Card, Alert, Skeleton, typography classes) to match current loading/error/unavailable patterns; do not edit files under frontend/src/components/ui (compose them instead). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Add a dedicated React Query hook for retrieving mantra text and wire it into existing loading/error UI patterns.",
+      "acceptanceCriteria": [
+        "There is a dedicated React Query hook for fetching mantra text keyed by (veda, mantraNumber, language).",
+        "Loading and error states for mantra text are handled gracefully (e.g., skeleton while loading, an English message when unavailable), consistent with existing meaning loading patterns."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a new React Query hook (e.g., useMantraText) that calls the backend actor's getMantraText with (veda, BigInt(mantraNumber), language). Ensure queryKey includes (veda, mantraNumber, language), and enable/disable behavior matches existing patterns (actor available, mantraNumber > 0). Keep behavior consistent with useMantraMeaning for staleTime and return type (string | null)."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "Website to browse Vedic mantras: users select a Veda, mantra number, and language (Telugu/English/Hindi) from dropdowns to display the mantra text and meaning in the selected language, similar to vedyog.net reference page.",
+  "architectural_notes": [
+    "Backend/API may need to store and return both mantra text and meaning per (Veda, MantraNumber, Language), not just meaning."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-a-single-page-ui-similar-in-spirit-to-the-reference-page-https-vedyog-net-samveda-mantra-php-id-7626-lang-that-lets-users-browse-vedic-mantras-by-selecting-a-veda-a-mantra-number-and-a-language-and-then-displays-the-mantra-meaning-in-the-selected-language",
+      "title": "Create a single-page UI similar in spirit to the reference page (https://vedyog.net/samveda_mantra.php?id=7626&lang=#) that lets users browse Vedic mantras by selecting a Veda, a mantra number, and a language, and then displays the mantra meaning in the selected language.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-veda-dropdown-with-exactly-these-options-rigveda-yajurveda-samaveda-atharvaveda",
+      "title": "Implement the Veda dropdown with exactly these options: Rigveda, Yajurveda, Samaveda, Atharvaveda.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-language-dropdown-with-exactly-these-options-telugu-english-hindi",
+      "title": "Implement the Language dropdown with exactly these options: Telugu, English, Hindi.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-mantra-dropdown-such-that-the-available-mantra-numbers-are-populated-based-on-the-selected-veda-e-g-1-2-3-for-that-veda",
+      "title": "Implement the Mantra dropdown such that the available mantra numbers are populated based on the selected Veda (e.g., 1, 2, 3, ... for that Veda).",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-connect-the-frontend-to-the-backend-using-react-query-so-that-1-selecting-a-veda-fetches-available-mantra-numbers-2-selecting-veda-mantra-language-fetches-and-displays-the-meaning",
+      "title": "Connect the frontend to the backend using React Query so that: (1) selecting a Veda fetches available mantra numbers; (2) selecting Veda + Mantra + Language fetches and displays the meaning.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-cohesive-visual-theme-across-the-app-colors-typography-spacing-and-component-styling-appropriate-for-a-mantra-reading-experience-avoiding-a-blue-purple-dominant-palette",
+      "title": "Apply a cohesive visual theme across the app (colors, typography, spacing, and component styling) appropriate for a mantra-reading experience, avoiding a blue/purple-dominant palette.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-generated-decorative-background-image-as-a-static-asset-and-use-it-in-the-ui-in-a-subtle-way-e-g-page-background-or-header-background-without-impacting-readability",
+      "title": "Add a generated decorative background image as a static asset and use it in the UI in a subtle way (e.g., page background or header background) without impacting readability.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-frontend-deep-link-handling-so-that-visiting-a-url-path-matching-samveda-47-and-samaveda-47-automatically-selects-veda-samaveda-and-mantra-number-47-in-the-existing-single-page-ui-and-displays-the-mantra-meaning-default-language-english-unless-a-language-is-already-selected-by-the-user",
+      "title": "Add frontend deep-link handling so that visiting a URL path matching /samveda/47 (and /samaveda/47) automatically selects Veda = Samaveda and Mantra Number = 47 in the existing single-page UI and displays the mantra meaning (default language = English unless a language is already selected by the user).",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-to-fetch-and-display-the-selected-mantra-text-in-the-selected-language-telugu-english-hindi-when-the-user-changes-the-language-dropdown-and-render-the-mantra-text-above-the-meaning-in-the-existing-single-page-ui",
+      "title": "Update the frontend to fetch and display the selected mantra text in the selected language (Telugu/English/Hindi) when the user changes the Language dropdown, and render the mantra text above the meaning in the existing single-page UI.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-extend-react-query-hooks-to-retrieve-the-mantra-text-from-the-backend-and-integrate-the-new-query-into-the-existing-data-loading-error-loading-ui-patterns",
+      "title": "Add/extend React Query hooks to retrieve the mantra text from the backend and integrate the new query into the existing data-loading/error/loading UI patterns.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Build mantra-browsing website with dropdowns for Veda (Rigveda/Yajurveda/Samaveda/Atharvaveda), mantra number, and language (Telugu/English/Hindi) to display the selected mantra meaning",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add backend data storage and query APIs for mantra meanings keyed by (Veda, MantraNumber) with per-language meaning values (Telugu/English/Hindi).",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Seed the backend with a minimal, demonstrable dataset that includes at least 2 mantra numbers for at least 1 Veda, and provide meanings for those mantras in all three languages (Telugu/English/Hindi), so the app works end-to-end without requiring manual data entry.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Support displaying Samaveda mantra 47 (end-to-end) similar to the referenced page https://www.xn--j2b3a4c.com/samveda/47 (i.e., ensure the app can fetch and render that specific mantra).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Seed the backend data so that Samaveda mantra number 47 is available and returns a non-null meaning for all supported languages (Telugu, English, Hindi) via the existing getMantraNumbers(#samaVeda) and getMantraMeaning(#samaVeda, 47, <language>) queries.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Display the selected mantra text in the chosen language (Telugu/English/Hindi) based on the Language dropdown (e.g., Samaveda mantra 47 should render in the selected language, not only the meaning).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Extend the backend to store and serve the mantra text (not only the meaning) per (Veda, MantraNumber) and per language (Telugu/English/Hindi), so the frontend can display the selected mantra text in the selected language.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Seed backend data for Samaveda mantra 47 so that the mantra text returned for each supported language is a translation of the user-provided Sanskrit mantra (Samaveda 47) in Telugu, English, and Hindi.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Vedic Mantra Browser with Veda/Mantra/Language Dropdowns",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

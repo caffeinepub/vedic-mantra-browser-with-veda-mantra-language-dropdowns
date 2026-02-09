@@ -1,0 +1,89 @@
+{
+  "kind": "build_request",
+  "title": "Display mantra text translated per selected language (Samaveda 47)",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-12",
+      "text": "Extend the backend to store and serve the mantra text (not only the meaning) per (Veda, MantraNumber) and per language (Telugu/English/Hindi), so the frontend can display the selected mantra text in the selected language.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Display Samaveda mantra 47: अदर्शि गातुवित्तमो यस्मिन्व्रतान्यादधुः । उपो षु जातमार्यस्य वर्धनमग्निं नक्षन्तु नो गिरः ॥४७॥ Translate into respective language, when we select from the dropdown it should display the mantra in respective languaage based on the selection"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes a query method that returns the mantra text for (veda, mantraNumber, language) as optional text (null when missing).",
+        "Existing queries for mantra numbers and meanings continue to work unchanged.",
+        "Language options remain exactly: Telugu, English, Hindi."
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Seed backend data for Samaveda mantra 47 so that the mantra text returned for each supported language is a translation of the user-provided Sanskrit mantra (Samaveda 47) in Telugu, English, and Hindi.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Display Samaveda mantra 47: अदर्शि गातुवित्तमो यस्मिन्व्रतान्यादधुः । उपो षु जातमार्यस्य वर्धनमग्निं नक्षन्तु नो गिरः ॥४७॥ Translate into respective language, when we select from the dropdown it should display the mantra in respective languaage based on the selection"
+        ]
+      },
+      "acceptanceCriteria": [
+        "For Veda=Samaveda and mantraNumber=47, the new backend text query returns non-null values for Telugu, English, and Hindi.",
+        "The returned texts are translations of the provided Sanskrit mantra (not placeholders like 'mantra 47 text')."
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "text": "Update the frontend to fetch and display the selected mantra text in the selected language (Telugu/English/Hindi) when the user changes the Language dropdown, and render the mantra text above the meaning in the existing single-page UI.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Translate into respective language, when we select from the dropdown it should display the mantra in respective languaage based on the selection"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When the user selects Samaveda + 47 and switches Language between Telugu/English/Hindi, the displayed mantra text changes accordingly without a page reload.",
+        "The meaning section continues to behave as it does today (still fetched by the existing meaning query) and remains visible below the mantra text.",
+        "Deep linking to /samveda/47 (or /samaveda/47) still auto-selects Samaveda and mantra 47, and the page shows both the mantra text and meaning for the selected (or default) language.",
+        "All user-facing UI strings introduced/modified for this change are in English."
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Add/extend React Query hooks to retrieve the mantra text from the backend and integrate the new query into the existing data-loading/error/loading UI patterns.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ]
+      },
+      "acceptanceCriteria": [
+        "There is a dedicated React Query hook for fetching mantra text keyed by (veda, mantraNumber, language).",
+        "Loading and error states for mantra text are handled gracefully (e.g., skeleton while loading, an English message when unavailable), consistent with existing meaning loading patterns."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
+    "Do not edit files under frontend/src/components/ui (compose them instead).",
+    "Do not edit immutable hook/entry paths listed in SYSTEM_CONTEXT (e.g., frontend/src/hooks/useActor.ts, frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/main.tsx)."
+  ],
+  "nonGoals": [
+    "Adding new languages beyond Telugu/English/Hindi.",
+    "Implementing third-party translation services or external APIs for translations.",
+    "Changing the existing Veda dropdown options or deep-link URL patterns."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

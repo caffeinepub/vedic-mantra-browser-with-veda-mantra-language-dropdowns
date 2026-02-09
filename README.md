@@ -1,2 +1,3 @@
-# vedic-mantra-browser-with-veda-mantra-language-dropdowns
-Exported from Caffeine project: Vedic Mantra Browser with Veda/Mantra/Language Dropdowns
+## 
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`
