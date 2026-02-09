@@ -1,63 +1,41 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix controlled Select value mismatches for Veda/Language/Mantra selection",
+  "title": "Fix Samaveda Mantra 47 dropdown visibility and add diagnostics + sensible defaults",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Make Veda and Language Select controls fully string-controlled and map strings to backend enums before invoking mantra-number queries.",
-      "acceptanceCriteria": [
-        "Changing Veda updates the mantra numbers list (e.g., Samaveda shows mantra 47 from the current dataset) without React console errors.",
-        "`useMantraNumbers(selectedVeda)` is invoked with a valid backend `Veda` value (not a string or '[object Object]').",
-        "The Veda dropdown trigger always shows the currently selected Veda label after selection."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Refactor Veda and Language selection state to be string-controlled (Select `value` and `SelectItem value` as strings), add explicit string<->enum mapping/validation (with safe fallback), and ensure hooks are called with validated backend `Veda`/`Language` enums. Use the shadcn-ui Select component composition patterns (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/utils/selectValueGuards.ts",
-          "operation": "modify",
-          "description": "Add small helper(s) to validate/normalize string-controlled Select values against allowed option sets (e.g., safe string selection with fallback) so App can reliably map strings to backend enums before queries."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Ensure Mantra Number Select trigger always displays the selected mantra number for auto-selection, manual selection, and deep links.",
+      "summary": "Ensure Mantra 47 renders/selects for Samaveda and show an English warning if Samaveda numbers load but 47 is missing.",
       "acceptanceCriteria": [
-        "After the app auto-selects the first available mantra number for a Veda, the Mantra Number Select trigger displays that number (not blank).",
-        "After manually selecting a mantra number from the list, the Mantra Number Select trigger displays the selected number.",
-        "Deep-linking to `/<veda-slug>/<number>` results in the trigger showing that mantra number when it exists in the fetched list; otherwise it falls back to the first available mantra number and shows it."
+        "When the user selects Samaveda, the Mantra Number dropdown list includes option \"47\".",
+        "If Samaveda is selected and the loaded mantra numbers do not include \"47\", the UI shows an English warning in the selection area that explicitly states that 47 is missing and lists the received options.",
+        "Selecting \"47\" updates the Select trigger to display \"47\" and the page loads text/meaning/metadata for Samaveda mantra 47 (no blank trigger state)."
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Make Mantra Number Select consistently string-controlled (store and pass a string value that exactly matches SelectItem values), synchronize bigint<->string conversions in auto-select and deep-link flows, and ensure the trigger never renders blank due to mismatched controlled values. Use the shadcn-ui Select component composition patterns (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
+          "description": "Update the Mantra Number Select to (1) use a guarded controlled value (via the existing select value guard) to prevent blank trigger states, (2) add a Samaveda-specific diagnostic warning when numbers are loaded but 47 is missing, and (3) ensure the dropdown options always render from the sorted/de-duplicated numbers list. Use existing shadcn-ui Select and Alert components (compose/consume only; do not edit components under frontend/src/components/ui). Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/utils/selectValueGuards.ts",
           "operation": "modify",
-          "description": "Extend guards/utilities so App can (a) detect when the currently selected mantra string does not exist in the loaded options and (b) compute a safe displayed Select value (prefer selected if valid, otherwise fall back to first available) to prevent blank triggers."
+          "description": "If needed to support App-level guard usage, extend or refine safeSelectValue behavior so it can be used cleanly with shadcn-ui Select value props without introducing blank trigger states when a value is valid (including \"47\"). Keep behavior English-only (no user-facing strings here)."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Add English diagnostic UI in the selection area when mantra numbers are empty or when the selected mantra value does not match loaded options.",
+      "summary": "Auto-select a sensible initial Veda/mantra when only one Veda has available mantras and the session is not deep-linked.",
       "acceptanceCriteria": [
-        "When mantra numbers fail to load or are empty, the UI shows an English diagnostic message that includes: current Veda, whether numbers are loading, and the count of loaded mantra numbers.",
-        "When a selected mantra value is not present in `uniqueSortedMantraNumbers`, the UI shows an English diagnostic message indicating the mismatch and the current selected value.",
-        "No diagnostic UI is shown during normal operation when mantra numbers are loaded and the selected value is valid."
+        "On first load (no deep link), if only one Veda has any mantra numbers available, that Veda is selected automatically.",
+        "After the Veda is auto-selected, the first available mantra number is auto-selected and displayed in the dropdown trigger."
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "In the mantra selection card (near the Mantra Number control), render lightweight English-only guardrail messages (e.g., using the existing Alert component) when numbers are empty/failed or when the selected mantra value is not found in the loaded options; ensure diagnostics are hidden during normal valid operation. Use existing shadcn-ui Alert composition (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
+          "description": "Add a first-load auto-defaulting flow: fetch mantra numbers for all Vedas (using the existing React Query hook) and, when not deep-linked, auto-select the only Veda that has any numbers. After the Veda auto-selects, ensure the first available mantra number is selected and shown in the Mantra Number Select trigger. Keep current behavior when multiple Vedas have numbers. Use existing shadcn-ui Select components (compose/consume only; do not edit components under frontend/src/components/ui). Verify the component's usage instructions before implementing."
         }
       ]
     }

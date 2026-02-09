@@ -4,37 +4,38 @@
   "summary": "New project",
   "architectural_notes": [],
   "known_issues": [
-    "Mantra numbers are still not showing in the dropdown after deployment/build."
+    "Dropdown is missing the '47 mantra' option (user reports it is not showing)."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-veda-and-language-select-controls-so-they-use-string-values-not-motoko-variant-objects-for-their-controlled-value-and-selectitem-value-and-reliably-map-those-strings-to-the-backend-veda-language-enums-before-calling-query-hooks-so-usemantranumbers-consistently-loads-options",
-      "title": "Fix the Veda and Language Select controls so they use string values (not Motoko variant objects) for their controlled `value` and `SelectItem value`, and reliably map those strings to the backend `Veda` / `Language` enums before calling query hooks (so `useMantraNumbers` consistently loads options).",
-      "reqIds": [
-        "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-mantra-number-dropdown-trigger-visibly-displays-the-selected-mantra-number-after-auto-selection-and-manual-selection-even-if-the-underlying-select-component-would-otherwise-render-a-blank-trigger-due-to-a-controlled-value-mismatch",
-      "title": "Ensure the Mantra Number dropdown trigger visibly displays the selected mantra number after auto-selection and manual selection, even if the underlying Select component would otherwise render a blank trigger due to a controlled-value mismatch.",
+      "id": "feature-update-the-mantra-number-dropdown-options-rendering-so-that-mantra-47-is-visible-selectable-when-samaveda-is-selected-and-add-a-clear-user-visible-diagnostic-message-english-if-the-backend-returns-mantra-numbers-for-samaveda-but-47-is-unexpectedly-missing",
+      "title": "Update the Mantra Number dropdown options rendering so that mantra 47 is visible/selectable when Samaveda is selected, and add a clear, user-visible diagnostic message (English) if the backend returns mantra numbers for Samaveda but 47 is unexpectedly missing.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-lightweight-user-visible-debugging-guardrails-in-the-mantra-selection-area-english-text-only-that-render-when-mantra-numbers-are-not-available-or-when-the-selected-mantra-value-does-not-match-any-loaded-options-to-make-the-failure-mode-obvious-in-deployed-builds",
-      "title": "Add lightweight, user-visible debugging guardrails in the mantra selection area (English text only) that render when mantra numbers are not available or when the selected mantra value does not match any loaded options, to make the failure mode obvious in deployed builds.",
+      "id": "feature-set-sensible-initial-defaults-so-the-app-does-not-appear-empty-in-a-fresh-session-when-only-a-small-set-of-mantras-exists-e-g-auto-select-samaveda-if-it-is-the-only-veda-with-available-mantras-otherwise-keep-current-default-behavior",
+      "title": "Set sensible initial defaults so the app does not appear empty in a fresh session when only a small set of mantras exists (e.g., auto-select Samaveda if it is the only Veda with available mantras; otherwise keep current default behavior).",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [],
-  "projectName": "Fix mantra number dropdown not showing selected value and ensure options load correctly",
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Ensure the backend `getMantraNumbers(#samaVeda)` query returns a list that includes mantra number 47 and is consistently ordered and de-duplicated.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "Fix missing Mantra 47 option in mantra number dropdown",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -56,10 +56,11 @@ function stringToLanguageEnum(langStr: string): Language {
 
 function App() {
   // All Select state is now string-controlled
-  const [selectedVedaString, setSelectedVedaString] = useState<string>('rikVeda');
+  const [selectedVedaString, setSelectedVedaString] = useState<string>('');
   const [selectedMantraString, setSelectedMantraString] = useState<string>('');
   const [selectedLanguageString, setSelectedLanguageString] = useState<string>('english');
   const [isDeepLinked, setIsDeepLinked] = useState<boolean>(false);
+  const [hasAutoSelected, setHasAutoSelected] = useState<boolean>(false);
 
   // Parse deep link on initial load - support /<veda-slug>/<number>
   useEffect(() => {
@@ -77,30 +78,57 @@ function App() {
         setSelectedMantraString(mantraNumber);
         setSelectedLanguageString('english');
         setIsDeepLinked(true);
+        setHasAutoSelected(true);
       }
     }
   }, []);
 
   // Convert string state to enums for backend queries
-  const selectedVeda = stringToVedaEnum(selectedVedaString);
+  const selectedVeda = selectedVedaString ? stringToVedaEnum(selectedVedaString) : Veda.samaVeda;
   const selectedLanguage = stringToLanguageEnum(selectedLanguageString);
   const selectedMantra = selectedMantraString ? BigInt(selectedMantraString) : 0n;
 
-  // Sync URL when user changes selection
-  useEffect(() => {
-    if (selectedMantra > 0n) {
-      const slug = vedaStringToSlug(selectedVedaString);
-      const newPath = `/${slug}/${selectedMantra.toString()}`;
-      
-      // Only update if path changed to avoid infinite loops
-      if (window.location.pathname !== newPath) {
-        window.history.pushState({}, '', newPath);
-      }
-    }
-  }, [selectedVedaString, selectedMantra]);
+  // Fetch available mantra numbers for all Vedas to enable auto-selection
+  const { data: rikVedaNumbers = [], isLoading: isLoadingRikVeda } = useMantraNumbers(Veda.rikVeda);
+  const { data: yajurVedaNumbers = [], isLoading: isLoadingYajurVeda } = useMantraNumbers(Veda.yajurVeda);
+  const { data: samaVedaNumbers = [], isLoading: isLoadingSamaVeda } = useMantraNumbers(Veda.samaVeda);
+  const { data: atharvaVedaNumbers = [], isLoading: isLoadingAtharvaVeda } = useMantraNumbers(Veda.atharvaVeda);
 
   // Fetch available mantra numbers for selected Veda
   const { data: mantraNumbers = [], isLoading: isLoadingNumbers, error: numbersError } = useMantraNumbers(selectedVeda);
+
+  // Auto-select Veda if only one has mantras and not deep-linked
+  useEffect(() => {
+    if (hasAutoSelected || isDeepLinked) return;
+    
+    const allLoading = isLoadingRikVeda || isLoadingYajurVeda || isLoadingSamaVeda || isLoadingAtharvaVeda;
+    if (allLoading) return;
+
+    const vedasWithMantras = [
+      { value: 'rikVeda', numbers: rikVedaNumbers },
+      { value: 'yajurVeda', numbers: yajurVedaNumbers },
+      { value: 'samaVeda', numbers: samaVedaNumbers },
+      { value: 'atharvaVeda', numbers: atharvaVedaNumbers },
+    ].filter(v => v.numbers.length > 0);
+
+    if (vedasWithMantras.length === 1 && !selectedVedaString) {
+      const onlyVeda = vedasWithMantras[0];
+      setSelectedVedaString(onlyVeda.value);
+      setHasAutoSelected(true);
+    }
+  }, [
+    rikVedaNumbers,
+    yajurVedaNumbers,
+    samaVedaNumbers,
+    atharvaVedaNumbers,
+    isLoadingRikVeda,
+    isLoadingYajurVeda,
+    isLoadingSamaVeda,
+    isLoadingAtharvaVeda,
+    selectedVedaString,
+    hasAutoSelected,
+    isDeepLinked,
+  ]);
 
   // Defensive de-duplication and sorting at render time
   const uniqueSortedMantraNumbers = useMemo(() => {
@@ -177,6 +205,19 @@ function App() {
     }
   }, [uniqueSortedMantraNumbers, isDeepLinked, selectedMantra, selectedMantraString]);
 
+  // Sync URL when user changes selection
+  useEffect(() => {
+    if (selectedMantra > 0n && selectedVedaString) {
+      const slug = vedaStringToSlug(selectedVedaString);
+      const newPath = `/${slug}/${selectedMantra.toString()}`;
+      
+      // Only update if path changed to avoid infinite loops
+      if (window.location.pathname !== newPath) {
+        window.history.pushState({}, '', newPath);
+      }
+    }
+  }, [selectedVedaString, selectedMantra]);
+
   const vedaLabel = VEDA_OPTIONS.find(v => v.value === selectedVedaString)?.label || '';
   const languageLabel = LANGUAGE_OPTIONS.find(l => l.value === selectedLanguageString)?.label || '';
 
@@ -195,6 +236,13 @@ function App() {
 
   // Diagnostic: Check if we have a mismatch
   const showMantraMismatchDiagnostic = selectedMantraString && !isMantraValueValid && !isLoadingNumbers;
+
+  // Samaveda-specific diagnostic: Check if 47 is missing
+  const isSamavedaSelected = selectedVedaString === 'samaVeda';
+  const samaveda47Missing = isSamavedaSelected && 
+    !isLoadingNumbers && 
+    uniqueSortedMantraNumbers.length > 0 && 
+    !uniqueSortedMantraNumbers.some(num => num === 47n);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 relative overflow-hidden">
@@ -288,20 +336,28 @@ function App() {
                   </Select>
                   
                   {/* Diagnostic: Empty mantra numbers */}
-                  {uniqueSortedMantraNumbers.length === 0 && !isLoadingNumbers && (
+                  {uniqueSortedMantraNumbers.length === 0 && !isLoadingNumbers && selectedVedaString && (
                     <Alert className="mt-2">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        No mantras are available for <strong>{vedaLabel}</strong>. 
-                        Current Veda: {selectedVedaString}, 
-                        Loading: {isLoadingNumbers ? 'yes' : 'no'}, 
-                        Count: {uniqueSortedMantraNumbers.length}
+                        No mantras are available for <strong>{vedaLabel}</strong>.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {/* Samaveda-specific diagnostic: 47 is missing */}
+                  {samaveda47Missing && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        <strong>Warning:</strong> Mantra 47 is missing from Samaveda. 
+                        Available options: {uniqueSortedMantraNumbers.map(n => n.toString()).join(', ')}
                       </AlertDescription>
                     </Alert>
                   )}
                   
                   {/* Diagnostic: Mantra value mismatch */}
-                  {showMantraMismatchDiagnostic && (
+                  {showMantraMismatchDiagnostic && !samaveda47Missing && (
                     <Alert className="mt-2">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
@@ -488,10 +544,10 @@ function App() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-border/40 bg-card/50 backdrop-blur-sm mt-16">
+        <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm mt-16">
           <div className="container mx-auto px-4 py-6">
             <p className="text-center text-sm text-muted-foreground">
-              © 2026. Built with ❤️ using{' '}
+              © 2026. Built with love using{' '}
               <a
                 href="https://caffeine.ai"
                 target="_blank"

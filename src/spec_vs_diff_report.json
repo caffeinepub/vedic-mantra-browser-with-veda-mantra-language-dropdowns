@@ -1,29 +1,58 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T04:13:53.583Z",
-  "summary": "REQ-1 appears implemented in App.tsx by converting Veda/Language Selects to string-controlled state and mapping those strings back to backend enums before querying. Due to App.tsx being truncated in the diff summary, there is insufficient evidence to confirm the REQ-2 Select-trigger display fix for Mantra Number and the REQ-3 user-visible diagnostic guardrails are fully implemented.",
+  "generatedAt": "2026-02-09T04:19:50.274Z",
+  "summary": "Backend adds Samaveda mantra 47 content, and frontend App.tsx appears to add dropdown/selection handling (including diagnostics and auto-selection). However, the backend getMantraNumbers implementation is still a simple map/filter with no explicit sorting or de-duplication, so REQ-1’s ordering/de-duplication requirement is not met at the backend level. Several additional frontend features/files are described that are not requested by the BuildRequest.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "Ensure the Mantra Number dropdown trigger visibly displays the selected mantra number after auto-selection and manual selection, including deep-link behavior fallback when the deep-linked value is not in the fetched list.",
-      "reason": "The diff excerpt shows string state for `selectedMantraString` and deep-link parsing, but does not show the Mantra Number Select rendering logic (SelectTrigger/SelectValue) or any explicit guard to prevent a blank trigger when the controlled value mismatches available options. The relevant portion may be in the truncated section, but it is not evidenced in the provided diff summary.",
+      "id": "REQ-1",
+      "requirement": "Ensure the backend `getMantraNumbers(#samaVeda)` query returns a list that is consistently ordered (sorted ascending) and de-duplicated.",
+      "reason": "In `backend/main.mo`, `getMantraNumbers` filters keys and maps to `mantraNumber` but does not apply any sort or de-duplication step. This does not guarantee ascending order or uniqueness at the backend level.",
       "evidence": [
-        "frontend/src/App.tsx (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "requirement": "Add user-visible English diagnostic guardrails in the mantra selection area when mantra numbers are unavailable/empty or when the selected mantra value does not match loaded options, and hide diagnostics during normal operation.",
-      "reason": "Although App.tsx imports Alert components, the provided diff excerpt does not show any conditional diagnostic UI rendering that includes current Veda, loading state, count of loaded numbers, or mismatch messaging. This may exist in truncated content but is not verifiable from the diff summary.",
-      "evidence": [
-        "frontend/src/App.tsx (truncated)"
+        "backend/main.mo"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.56,
+  "hallucinated_features": [
+    {
+      "description": "Deep-link routing support (e.g., parsing and syncing URLs like `/<veda-slug>/<number>`).",
+      "reason": "Not requested in any requirement; BuildRequest only mentions fresh-session defaults when no deep link, not adding deep-link routing features.",
+      "evidence": [
+        "frontend/src/App.tsx"
+      ]
+    },
+    {
+      "description": "SPA hosting fallbacks via `frontend/public/_redirects` and `frontend/public/404.html`.",
+      "reason": "Not requested; no requirements mention hosting configuration or adding redirect/404 fallback files.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "Global UI re-theme (parchment-inspired OKLCH palette) and Tailwind theme token changes.",
+      "reason": "Not requested; requirements focus on dropdown option visibility/diagnostics and initial defaults, not UI rebranding/theme work.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "New/changed audio behavior requiring Internet Identity authentication to upload/replace audio and allowing anonymous playback.",
+      "reason": "Not requested; BuildRequest explicitly lists non-goal of adding new authentication methods, and does not request changing audio upload/play rules.",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "New utility module `frontend/src/utils/selectValueGuards.ts` for Select value coercion/blank-trigger prevention.",
+      "reason": "Not requested explicitly; while it may help avoid blank trigger state, creating a new utility module is beyond stated requirements (REQ-2 only requires correct selection/display for 47 and a diagnostic message).",
+      "evidence": [
+        "frontend-file-summaries.txt"
+      ]
+    }
+  ],
+  "confidence": 0.64,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
     "project_state.json"

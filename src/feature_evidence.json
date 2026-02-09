@@ -2,27 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-veda-and-language-select-controls-so-they-use-string-values-not-motoko-variant-objects-for-their-controlled-value-and-selectitem-value-and-reliably-map-those-strings-to-the-backend-veda-language-enums-before-calling-query-hooks-so-usemantranumbers-consistently-loads-options",
-      "featureTitle": "Fix the Veda and Language Select controls so they use string values (not Motoko variant objects) for their controlled `value` and `SelectItem value`, and reliably map those strings to the backend `Veda` / `Language` enums before calling query hooks (so `useMantraNumbers` consistently loads options).",
-      "files": [
-        "frontend/src/App.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-the-mantra-number-dropdown-trigger-visibly-displays-the-selected-mantra-number-after-auto-selection-and-manual-selection-even-if-the-underlying-select-component-would-otherwise-render-a-blank-trigger-due-to-a-controlled-value-mismatch",
-      "featureTitle": "Ensure the Mantra Number dropdown trigger visibly displays the selected mantra number after auto-selection and manual selection, even if the underlying Select component would otherwise render a blank trigger due to a controlled-value mismatch.",
+      "featureId": "feature-update-the-mantra-number-dropdown-options-rendering-so-that-mantra-47-is-visible-selectable-when-samaveda-is-selected-and-add-a-clear-user-visible-diagnostic-message-english-if-the-backend-returns-mantra-numbers-for-samaveda-but-47-is-unexpectedly-missing",
+      "featureTitle": "Update the Mantra Number dropdown options rendering so that mantra 47 is visible/selectable when Samaveda is selected, and add a clear, user-visible diagnostic message (English) if the backend returns mantra numbers for Samaveda but 47 is unexpectedly missing.",
       "files": [
         "frontend/src/App.tsx"
       ],
@@ -40,8 +21,8 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-lightweight-user-visible-debugging-guardrails-in-the-mantra-selection-area-english-text-only-that-render-when-mantra-numbers-are-not-available-or-when-the-selected-mantra-value-does-not-match-any-loaded-options-to-make-the-failure-mode-obvious-in-deployed-builds",
-      "featureTitle": "Add lightweight, user-visible debugging guardrails in the mantra selection area (English text only) that render when mantra numbers are not available or when the selected mantra value does not match any loaded options, to make the failure mode obvious in deployed builds.",
+      "featureId": "feature-set-sensible-initial-defaults-so-the-app-does-not-appear-empty-in-a-fresh-session-when-only-a-small-set-of-mantras-exists-e-g-auto-select-samaveda-if-it-is-the-only-veda-with-available-mantras-otherwise-keep-current-default-behavior",
+      "featureTitle": "Set sensible initial defaults so the app does not appear empty in a fresh session when only a small set of mantras exists (e.g., auto-select Samaveda if it is the only Veda with available mantras; otherwise keep current default behavior).",
       "files": [
         "frontend/src/App.tsx"
       ],

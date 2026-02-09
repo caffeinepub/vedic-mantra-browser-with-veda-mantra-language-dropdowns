@@ -1,72 +1,71 @@
 {
   "kind": "build_request",
-  "title": "Fix mantra number dropdown not showing selected value and ensure options load correctly",
+  "title": "Fix missing Mantra 47 option in mantra number dropdown",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the Veda and Language Select controls so they use string values (not Motoko variant objects) for their controlled `value` and `SelectItem value`, and reliably map those strings to the backend `Veda` / `Language` enums before calling query hooks (so `useMantraNumbers` consistently loads options).",
-      "target": "frontend",
+      "text": "Ensure the backend `getMantraNumbers(#samaVeda)` query returns a list that includes mantra number 47 and is consistently ordered and de-duplicated.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages-3"
+          "msg-1"
         ],
         "quotes": [
-          "Still it is not showing"
+          "Still 47 mantra is not showing in the dropdown"
         ]
       },
       "acceptanceCriteria": [
-        "Changing Veda updates the mantra numbers list (e.g., Samaveda shows mantra 47 from the current dataset) without React console errors.",
-        "`useMantraNumbers(selectedVeda)` is invoked with a valid backend `Veda` value (not a string or '[object Object]').",
-        "The Veda dropdown trigger always shows the currently selected Veda label after selection."
+        "Calling `getMantraNumbers(#samaVeda)` returns an array containing `47`.",
+        "The returned array is sorted ascending and contains no duplicates.",
+        "No other backend query methods regress (meaning/text/metadata/audio still work as before)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Ensure the Mantra Number dropdown trigger visibly displays the selected mantra number after auto-selection and manual selection, even if the underlying Select component would otherwise render a blank trigger due to a controlled-value mismatch.",
+      "text": "Update the Mantra Number dropdown options rendering so that mantra 47 is visible/selectable when Samaveda is selected, and add a clear, user-visible diagnostic message (English) if the backend returns mantra numbers for Samaveda but 47 is unexpectedly missing.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-3"
+          "msg-1"
         ],
         "quotes": [
-          "Still it is not showing"
+          "Still 47 mantra is not showing in the dropdown"
         ]
       },
       "acceptanceCriteria": [
-        "After the app auto-selects the first available mantra number for a Veda, the Mantra Number Select trigger displays that number (not blank).",
-        "After manually selecting a mantra number from the list, the Mantra Number Select trigger displays the selected number.",
-        "Deep-linking to `/<veda-slug>/<number>` results in the trigger showing that mantra number when it exists in the fetched list; otherwise it falls back to the first available mantra number and shows it."
+        "When the user selects Samaveda, the Mantra Number dropdown list includes option \"47\".",
+        "If Samaveda is selected and the loaded mantra numbers do not include \"47\", the UI shows an English warning in the selection area that explicitly states that 47 is missing and lists the received options.",
+        "Selecting \"47\" updates the Select trigger to display \"47\" and the page loads text/meaning/metadata for Samaveda mantra 47 (no blank trigger state)."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Add lightweight, user-visible debugging guardrails in the mantra selection area (English text only) that render when mantra numbers are not available or when the selected mantra value does not match any loaded options, to make the failure mode obvious in deployed builds.",
+      "text": "Set sensible initial defaults so the app does not appear empty in a fresh session when only a small set of mantras exists (e.g., auto-select Samaveda if it is the only Veda with available mantras; otherwise keep current default behavior).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "recent-messages-3"
+          "msg-1"
         ],
         "quotes": [
-          "Still it is not showing"
+          "Still 47 mantra is not showing in the dropdown"
         ]
       },
       "acceptanceCriteria": [
-        "When mantra numbers fail to load or are empty, the UI shows an English diagnostic message that includes: current Veda, whether numbers are loading, and the count of loaded mantra numbers.",
-        "When a selected mantra value is not present in `uniqueSortedMantraNumbers`, the UI shows an English diagnostic message indicating the mismatch and the current selected value.",
-        "No diagnostic UI is shown during normal operation when mantra numbers are loaded and the selected value is valid."
+        "On first load (no deep link), if only one Veda has any mantra numbers available, that Veda is selected automatically.",
+        "After the Veda is auto-selected, the first available mantra number is auto-selected and displayed in the dropdown trigger."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under `frontend/src/components/ui` (compose them only).",
-    "Do not edit immutable hook files: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`.",
-    "Keep all user-facing diagnostic and UI text in English."
+    "Backend must remain a single Motoko actor in `backend/main.mo`.",
+    "Do not edit files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or anything in `frontend/src/components/ui` (compose/consume only).",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Adding new backend mantra content beyond what already exists (e.g., more mantras than the current Samaveda 47 seed).",
-    "Adding new features like shareable links (not requested in the latest message).",
-    "Introducing any third-party analytics or logging services."
+    "Adding new mantra content beyond what is required to make Mantra 47 appear correctly.",
+    "Adding new authentication methods beyond Internet Identity.",
+    "Adding real-time updates or push notifications."
   ],
   "imageRequirements": {
     "required": [],
