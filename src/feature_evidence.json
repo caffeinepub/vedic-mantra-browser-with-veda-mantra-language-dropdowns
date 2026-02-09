@@ -2,26 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-frontend-to-fetch-and-display-the-selected-mantra-text-in-the-selected-language-telugu-english-hindi-when-the-user-changes-the-language-dropdown-and-render-the-mantra-text-above-the-meaning-in-the-existing-single-page-ui",
-      "featureTitle": "Update the frontend to fetch and display the selected mantra text in the selected language (Telugu/English/Hindi) when the user changes the Language dropdown, and render the mantra text above the meaning in the existing single-page UI.",
-      "files": [
-        "frontend/src/App.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-14"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-extend-react-query-hooks-to-retrieve-the-mantra-text-from-the-backend-and-integrate-the-new-query-into-the-existing-data-loading-error-loading-ui-patterns",
-      "featureTitle": "Add/extend React Query hooks to retrieve the mantra text from the backend and integrate the new query into the existing data-loading/error/loading UI patterns.",
+      "featureId": "feature-fix-the-frontend-so-that-when-the-user-selects-language-english-or-language-telugu-from-the-language-dropdown-the-mantra-text-display-section-renders-the-mantra-text-returned-by-the-backend-for-the-current-veda-mantra-number-selection-and-does-not-remain-empty-or-show-no-text-available-when-valid-text-exists",
+      "featureTitle": "Fix the frontend so that when the user selects Language = English or Language = Telugu from the Language dropdown, the Mantra Text Display section renders the mantra text returned by the backend for the current (Veda, Mantra Number) selection (and does not remain empty or show \"No text available\" when valid text exists).",
       "files": [
         "frontend/src/hooks/useQueries.ts"
       ],
@@ -33,7 +15,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-15"
+        "REQ-24"
       ],
       "confidence": "high"
     }

@@ -1,6 +1,6 @@
 {
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for fetching mantra numbers, mantra text (translations), and mantra meanings by Veda/number/language with proper caching and type conversion.",
-  "frontend/src/App.tsx": "Main single-page application with three dropdowns (Veda, Mantra, Language) displaying both mantra text and meaning in separate cards; includes deep-link support for /samveda/:number routes that auto-select Samaveda and the specified mantra number on initial load.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for fetching mantra numbers, text, and meanings with proper null handling to ensure empty results are normalized to null rather than undefined.",
+  "frontend/src/App.tsx": "Main single-page application with three dropdowns (Veda, Mantra, Language) displaying both mantra text and meaning in separate cards; uses isFetching for loading states, resets mantra selection on Veda change, includes deep-link support, and treats empty/whitespace-only strings as missing content with hasValidText() helper.",
   "frontend/src/index.css": "Global styles with warm parchment-inspired OKLCH color palette for light mode and rich dark tones for dark mode, avoiding blue/purple dominance.",
   "frontend/tailwind.config.js": "Tailwind configuration extending the theme with custom color tokens, typography, and design system utilities for the Vedic mantra browser."
 }

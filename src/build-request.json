@@ -1,89 +1,67 @@
 {
   "kind": "build_request",
-  "title": "Display mantra text translated per selected language (Samaveda 47)",
+  "title": "Fix missing English/Telugu mantra text when switching language dropdown",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-12",
-      "text": "Extend the backend to store and serve the mantra text (not only the meaning) per (Veda, MantraNumber) and per language (Telugu/English/Hindi), so the frontend can display the selected mantra text in the selected language.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Display Samaveda mantra 47: अदर्शि गातुवित्तमो यस्मिन्व्रतान्यादधुः । उपो षु जातमार्यस्य वर्धनमग्निं नक्षन्तु नो गिरः ॥४७॥ Translate into respective language, when we select from the dropdown it should display the mantra in respective languaage based on the selection"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Backend exposes a query method that returns the mantra text for (veda, mantraNumber, language) as optional text (null when missing).",
-        "Existing queries for mantra numbers and meanings continue to work unchanged.",
-        "Language options remain exactly: Telugu, English, Hindi."
-      ]
-    },
-    {
-      "id": "REQ-13",
-      "text": "Seed backend data for Samaveda mantra 47 so that the mantra text returned for each supported language is a translation of the user-provided Sanskrit mantra (Samaveda 47) in Telugu, English, and Hindi.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Display Samaveda mantra 47: अदर्शि गातुवित्तमो यस्मिन्व्रतान्यादधुः । उपो षु जातमार्यस्य वर्धनमग्निं नक्षन्तु नो गिरः ॥४७॥ Translate into respective language, when we select from the dropdown it should display the mantra in respective languaage based on the selection"
-        ]
-      },
-      "acceptanceCriteria": [
-        "For Veda=Samaveda and mantraNumber=47, the new backend text query returns non-null values for Telugu, English, and Hindi.",
-        "The returned texts are translations of the provided Sanskrit mantra (not placeholders like 'mantra 47 text')."
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "text": "Update the frontend to fetch and display the selected mantra text in the selected language (Telugu/English/Hindi) when the user changes the Language dropdown, and render the mantra text above the meaning in the existing single-page UI.",
+      "id": "REQ-24",
+      "text": "Fix the frontend so that when the user selects Language = English or Language = Telugu from the Language dropdown, the Mantra Text Display section renders the mantra text returned by the backend for the current (Veda, Mantra Number) selection (and does not remain empty or show \"No text available\" when valid text exists).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "Translate into respective language, when we select from the dropdown it should display the mantra in respective languaage based on the selection"
+          "I can't see the mantra in english and telugu in the content, once we select the english or telugu from the dropdown"
         ]
       },
       "acceptanceCriteria": [
-        "When the user selects Samaveda + 47 and switches Language between Telugu/English/Hindi, the displayed mantra text changes accordingly without a page reload.",
-        "The meaning section continues to behave as it does today (still fetched by the existing meaning query) and remains visible below the mantra text.",
-        "Deep linking to /samveda/47 (or /samaveda/47) still auto-selects Samaveda and mantra 47, and the page shows both the mantra text and meaning for the selected (or default) language.",
-        "All user-facing UI strings introduced/modified for this change are in English."
+        "Given Veda = Samaveda and Mantra Number = 47, switching Language between English and Telugu updates the Mantra Text Display section to show non-empty text for the selected language.",
+        "Switching Language between English and Telugu does not require a page refresh; the text updates as a result of changing the dropdown selection.",
+        "The Mantra Text Display section shows the same loading/error UI patterns as the rest of the app while fetching, and does not show stale text from the previously selected language."
       ]
     },
     {
-      "id": "REQ-15",
-      "text": "Add/extend React Query hooks to retrieve the mantra text from the backend and integrate the new query into the existing data-loading/error/loading UI patterns.",
-      "target": "frontend",
+      "id": "REQ-25",
+      "text": "Fix the backend data/state so that getMantraText(#samaVeda, 47, #english) and getMantraText(#samaVeda, 47, #telugu) return non-empty mantra text values (not the meaning), and ensure this correction is applied to already-deployed canister state via a conditional migration if needed (without changing the public query APIs).",
+      "target": "backend",
       "source": {
         "messageIds": [
           "msg-4"
+        ],
+        "quotes": [
+          "I can't see the mantra in english and telugu in the content, once we select the english or telugu from the dropdown"
         ]
       },
       "acceptanceCriteria": [
-        "There is a dedicated React Query hook for fetching mantra text keyed by (veda, mantraNumber, language).",
-        "Loading and error states for mantra text are handled gracefully (e.g., skeleton while loading, an English message when unavailable), consistent with existing meaning loading patterns."
+        "Calling getMantraText(#samaVeda, 47, #english) returns ?Text with a non-empty value.",
+        "Calling getMantraText(#samaVeda, 47, #telugu) returns ?Text with a non-empty value.",
+        "Calling getMantraMeaning(#samaVeda, 47, #english) and getMantraMeaning(#samaVeda, 47, #telugu) continues to return the meaning (not the mantra text).",
+        "After an upgrade (when existing state is present), the fix is applied automatically via conditional migration so that the frontend can display English/Telugu mantra text for Samaveda 47."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
-    "Do not edit files under frontend/src/components/ui (compose them instead).",
-    "Do not edit immutable hook/entry paths listed in SYSTEM_CONTEXT (e.g., frontend/src/hooks/useActor.ts, frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/main.tsx)."
+    "Backend must remain a single Motoko actor in backend/main.mo; only add/update backend/migration.mo if a state upgrade is required.",
+    "Do not modify files under frontend/src/components/ui or any frontend immutablePaths (compose existing UI components instead).",
+    "Use English for any user-facing text in the UI and in this build request."
   ],
   "nonGoals": [
-    "Adding new languages beyond Telugu/English/Hindi.",
-    "Implementing third-party translation services or external APIs for translations.",
-    "Changing the existing Veda dropdown options or deep-link URL patterns."
+    "Adding new languages or changing the existing dropdown options.",
+    "Changing URL/deep-link behavior beyond what is needed to fix the missing text rendering."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

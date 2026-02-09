@@ -1,7 +1,8 @@
+import Order "mo:core/Order";
 import Map "mo:core/Map";
+import Nat "mo:core/Nat";
 import Array "mo:core/Array";
 import Iter "mo:core/Iter";
-import Order "mo:core/Order";
 import Migration "migration";
 
 (with migration = Migration.run)
@@ -47,26 +48,13 @@ actor {
     };
   };
 
-  type MantraEntry = {
-    veda : Veda;
-    mantraNumber : Nat;
-    translations : MantraWithTranslations;
-  };
-
-  // Persistent store for mantras and their translations
   let mantras = Map.empty<Mantra, MantraWithTranslations>();
 
   public query ({ caller }) func getMantraNumbers(veda : Veda) : async [Nat] {
     let filteredMantras = mantras.keys().toArray().filter(
-      func(entry) {
-        entry.veda == veda;
-      }
+      func(entry) { entry.veda == veda }
     );
-    filteredMantras.map(
-      func(mantra) {
-        mantra.mantraNumber;
-      }
-    );
+    filteredMantras.map(func(mantra) { mantra.mantraNumber });
   };
 
   public query ({ caller }) func getMantraMeaning(

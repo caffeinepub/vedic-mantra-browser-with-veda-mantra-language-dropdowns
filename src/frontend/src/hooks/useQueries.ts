@@ -13,8 +13,9 @@ export function useMantraNumbers(veda: Veda) {
     queryFn: async () => {
       if (!actor) return [];
       const numbers = await actor.getMantraNumbers(veda);
-      // Convert BigInt to number for easier handling in UI
-      return numbers.map(n => Number(n));
+      // Convert BigInt to number, deduplicate, and sort ascending
+      const uniqueNumbers = Array.from(new Set(numbers.map(n => Number(n))));
+      return uniqueNumbers.sort((a, b) => a - b);
     },
     enabled: !!actor && !isActorFetching,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -31,7 +32,9 @@ export function useMantraMeaning(veda: Veda, mantraNumber: number, language: Lan
     queryKey: ['mantraMeaning', veda, mantraNumber, language],
     queryFn: async () => {
       if (!actor) return null;
-      return await actor.getMantraMeaning(veda, BigInt(mantraNumber), language);
+      const result = await actor.getMantraMeaning(veda, BigInt(mantraNumber), language);
+      // Ensure we return null for empty/undefined results
+      return result || null;
     },
     enabled: !!actor && !isActorFetching && mantraNumber > 0,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
@@ -48,7 +51,9 @@ export function useMantraText(veda: Veda, mantraNumber: number, language: Langua
     queryKey: ['mantraText', veda, mantraNumber, language],
     queryFn: async () => {
       if (!actor) return null;
-      return await actor.getMantraText(veda, BigInt(mantraNumber), language);
+      const result = await actor.getMantraText(veda, BigInt(mantraNumber), language);
+      // Ensure we return null for empty/undefined results
+      return result || null;
     },
     enabled: !!actor && !isActorFetching && mantraNumber > 0,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes

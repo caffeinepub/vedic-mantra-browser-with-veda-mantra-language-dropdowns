@@ -51,18 +51,25 @@ function App() {
   const { data: mantraNumbers = [], isLoading: isLoadingNumbers, error: numbersError } = useMantraNumbers(selectedVeda);
 
   // Fetch text for selected combination
-  const { data: mantraText, isLoading: isLoadingText, error: textError } = useMantraText(
+  const { data: mantraText, isFetching: isFetchingText, error: textError } = useMantraText(
     selectedVeda,
     selectedMantra,
     selectedLanguage
   );
 
   // Fetch meaning for selected combination
-  const { data: meaning, isLoading: isLoadingMeaning, error: meaningError } = useMantraMeaning(
+  const { data: meaning, isFetching: isFetchingMeaning, error: meaningError } = useMantraMeaning(
     selectedVeda,
     selectedMantra,
     selectedLanguage
   );
+
+  // Handle Veda change: reset mantra selection immediately
+  const handleVedaChange = (value: string) => {
+    setSelectedVeda(value as Veda);
+    setSelectedMantra(0); // Reset to 0 immediately to clear stale content
+    setIsDeepLinked(false);
+  };
 
   // Auto-select first mantra when Veda changes (but not if deep-linked)
   useEffect(() => {
@@ -82,15 +89,16 @@ function App() {
       if (selectedMantra === 0 || !mantraNumbers.includes(selectedMantra)) {
         setSelectedMantra(mantraNumbers[0]);
       }
-    } else {
-      // No mantras available, reset to 0 unless deep-linked
-      if (!isDeepLinked) {
-        setSelectedMantra(0);
-      }
     }
   }, [mantraNumbers, isDeepLinked, selectedMantra]);
 
   const vedaLabel = VEDA_OPTIONS.find(v => v.value === selectedVeda)?.label || '';
+  const languageLabel = LANGUAGE_OPTIONS.find(l => l.value === selectedLanguage)?.label || '';
+
+  // Helper function to check if text is valid (not null, not empty, not just whitespace)
+  const hasValidText = (text: string | null | undefined): boolean => {
+    return !!text && text.trim().length > 0;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 relative overflow-hidden">
@@ -142,10 +150,7 @@ function App() {
                   </Label>
                   <Select
                     value={selectedVeda}
-                    onValueChange={(value) => {
-                      setSelectedVeda(value as Veda);
-                      setIsDeepLinked(false);
-                    }}
+                    onValueChange={handleVedaChange}
                   >
                     <SelectTrigger id="veda-select" className="w-full">
                       <SelectValue placeholder="Select a Veda" />
@@ -167,12 +172,12 @@ function App() {
                     Mantra Number
                   </Label>
                   <Select
-                    value={selectedMantra.toString()}
+                    value={selectedMantra > 0 ? selectedMantra.toString() : ""}
                     onValueChange={(value) => {
                       setSelectedMantra(Number(value));
                       setIsDeepLinked(false);
                     }}
-                    disabled={isLoadingNumbers}
+                    disabled={isLoadingNumbers || mantraNumbers.length === 0}
                   >
                     <SelectTrigger id="mantra-select" className="w-full">
                       <SelectValue placeholder={isLoadingNumbers ? "Loading..." : "Select mantra"} />
@@ -222,10 +227,10 @@ function App() {
           <Card className="mb-8 shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-xl">
-                {vedaLabel} - Mantra {selectedMantra}
+                {vedaLabel} - Mantra {selectedMantra > 0 ? selectedMantra : '—'}
               </CardTitle>
               <CardDescription>
-                Text in {LANGUAGE_OPTIONS.find(l => l.value === selectedLanguage)?.label}
+                Text in {languageLabel}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -245,7 +250,7 @@ function App() {
                 </Alert>
               )}
 
-              {isLoadingText && (
+              {isFetchingText && selectedMantra > 0 && (
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-5/6" />
@@ -253,9 +258,9 @@ function App() {
                 </div>
               )}
 
-              {!isLoadingText && !textError && selectedMantra > 0 && (
+              {!isFetchingText && !textError && selectedMantra > 0 && (
                 <div className="prose prose-lg max-w-none dark:prose-invert">
-                  {mantraText ? (
+                  {hasValidText(mantraText) ? (
                     <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap font-medium">
                       {mantraText}
                     </p>
@@ -284,7 +289,7 @@ function App() {
             <CardHeader>
               <CardTitle className="text-xl">Meaning</CardTitle>
               <CardDescription>
-                Interpretation in {LANGUAGE_OPTIONS.find(l => l.value === selectedLanguage)?.label}
+                Interpretation in {languageLabel}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -296,7 +301,7 @@ function App() {
                 </Alert>
               )}
 
-              {isLoadingMeaning && (
+              {isFetchingMeaning && selectedMantra > 0 && (
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-5/6" />
@@ -304,9 +309,9 @@ function App() {
                 </div>
               )}
 
-              {!isLoadingMeaning && !meaningError && selectedMantra > 0 && (
+              {!isFetchingMeaning && !meaningError && selectedMantra > 0 && (
                 <div className="prose prose-lg max-w-none dark:prose-invert">
-                  {meaning ? (
+                  {hasValidText(meaning) ? (
                     <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap">
                       {meaning}
                     </p>

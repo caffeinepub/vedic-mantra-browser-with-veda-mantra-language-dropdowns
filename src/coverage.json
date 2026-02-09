@@ -1,50 +1,33 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T00:26:22.260Z",
+  "generatedAt": "2026-02-09T00:53:11.541Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 2,
+    "total": 2,
+    "implemented": 1,
     "items": [
       {
-        "id": "REQ-12",
-        "summary": "Extend the backend to store and serve the mantra text (not only the meaning) per (Veda, MantraNumber) and per language (Telugu/English/Hindi), so the frontend can display the selected mantra text in the selected language.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-13",
-        "summary": "Seed backend data for Samaveda mantra 47 so that the mantra text returned for each supported language is a translation of the user-provided Sanskrit mantra (Samaveda 47) in Telugu, English, and Hindi.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-14",
-        "summary": "Update the frontend to fetch and display the selected mantra text in the selected language (Telugu/English/Hindi) when the user changes the Language dropdown, and render the mantra text above the meaning in the existing single-page UI.",
+        "id": "REQ-24",
+        "summary": "Fix the frontend so that when the user selects Language = English or Language = Telugu from the Language dropdown, the Mantra Text Display section renders the mantra text returned by the backend for the current (Veda, Mantra Number) selection (and does not remain empty or show \"No text available\" when valid text exists).",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
           "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-15",
-        "summary": "Add/extend React Query hooks to retrieve the mantra text from the backend and integrate the new query into the existing data-loading/error/loading UI patterns.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts"
         ],
         "matchedFiles": [
           "frontend/src/hooks/useQueries.ts"
         ]
+      },
+      {
+        "id": "REQ-25",
+        "summary": "Fix the backend data/state so that getMantraText(#samaVeda, 47, #english) and getMantraText(#samaVeda, 47, #telugu) return non-empty mantra text values (not the meaning), and ensure this correction is applied to already-deployed canister state via a conditional migration if needed (without changing the public query APIs).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       }
     ]
   },
@@ -55,11 +38,6 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
     "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
