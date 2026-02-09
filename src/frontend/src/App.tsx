@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Veda, Language } from './backend';
-import { useMantraNumbers, useMantraMeaning, useMantraText } from './hooks/useQueries';
+import { useMantraNumbers, useMantraMeaning, useMantraText, useMantraMetadata } from './hooks/useQueries';
 import {
   Select,
   SelectContent,
@@ -12,7 +12,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BookOpen, Languages, Library } from 'lucide-react';
+import { BookOpen, Languages, Library, AlertCircle } from 'lucide-react';
+import { MantraMetadataHeader } from './components/MantraMetadataHeader';
+import { MantraAudioSection } from './components/MantraAudioSection';
 
 const VEDA_OPTIONS = [
   { value: Veda.rikVeda, label: 'Rigveda' },
@@ -36,19 +38,27 @@ function App() {
   // Parse deep link on initial load
   useEffect(() => {
     const path = window.location.pathname;
-    // Match /samveda/:number or /samaveda/:number
-    const match = path.match(/^\/(samveda|samaveda)\/(\d+)$/i);
+    // Match /samveda/:number with optional trailing slash, case-insensitive
+    const match = path.match(/^\/samaveda\/(\d+)\/?$/i);
     
     if (match) {
-      const mantraNumber = parseInt(match[2], 10);
+      const mantraNumber = parseInt(match[1], 10);
       setSelectedVeda(Veda.samaVeda);
       setSelectedMantra(mantraNumber);
+      setSelectedLanguage(Language.english); // Explicitly set language to English for deep links
       setIsDeepLinked(true);
     }
   }, []);
 
   // Fetch available mantra numbers for selected Veda
   const { data: mantraNumbers = [], isLoading: isLoadingNumbers, error: numbersError } = useMantraNumbers(selectedVeda);
+
+  // Fetch metadata for selected combination
+  const { data: metadata, isFetching: isFetchingMetadata, error: metadataError } = useMantraMetadata(
+    selectedVeda,
+    selectedMantra,
+    selectedLanguage
+  );
 
   // Fetch text for selected combination
   const { data: mantraText, isFetching: isFetchingText, error: textError } = useMantraText(
@@ -69,6 +79,11 @@ function App() {
     setSelectedVeda(value as Veda);
     setSelectedMantra(0); // Reset to 0 immediately to clear stale content
     setIsDeepLinked(false);
+  };
+
+  // Handle Language change: ensure UI updates immediately
+  const handleLanguageChange = (value: string) => {
+    setSelectedLanguage(value as Language);
   };
 
   // Auto-select first mantra when Veda changes (but not if deep-linked)
@@ -99,6 +114,9 @@ function App() {
   const hasValidText = (text: string | null | undefined): boolean => {
     return !!text && text.trim().length > 0;
   };
+
+  // Check if we should show the audio section (Samaveda, Mantra 47)
+  const shouldShowAudio = selectedVeda === Veda.samaVeda && selectedMantra === 47;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 relative overflow-hidden">
@@ -191,9 +209,12 @@ function App() {
                     </SelectContent>
                   </Select>
                   {mantraNumbers.length === 0 && !isLoadingNumbers && (
-                    <p className="text-xs text-muted-foreground">
-                      No mantras available for this Veda
-                    </p>
+                    <Alert className="mt-2">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        No mantras are available for <strong>{vedaLabel}</strong>. The database may not contain content for this Veda yet.
+                      </AlertDescription>
+                    </Alert>
                   )}
                 </div>
 
@@ -205,7 +226,7 @@ function App() {
                   </Label>
                   <Select
                     value={selectedLanguage}
-                    onValueChange={(value) => setSelectedLanguage(value as Language)}
+                    onValueChange={handleLanguageChange}
                   >
                     <SelectTrigger id="language-select" className="w-full">
                       <SelectValue placeholder="Select a language" />
@@ -236,6 +257,7 @@ function App() {
             <CardContent>
               {numbersError && (
                 <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     Error loading mantra numbers. Please try again.
                   </AlertDescription>
@@ -244,13 +266,24 @@ function App() {
 
               {textError && (
                 <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     Error loading mantra text. Please try again.
                   </AlertDescription>
                 </Alert>
               )}
 
-              {isFetchingText && selectedMantra > 0 && (
+              {metadataError && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Error loading mantra metadata. Please try again.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Show loading state during fetch */}
+              {(isFetchingMetadata || isFetchingText) && selectedMantra > 0 && (
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-5/6" />
@@ -258,24 +291,35 @@ function App() {
                 </div>
               )}
 
-              {!isFetchingText && !textError && selectedMantra > 0 && (
-                <div className="prose prose-lg max-w-none dark:prose-invert">
-                  {hasValidText(mantraText) ? (
-                    <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap font-medium">
-                      {mantraText}
-                    </p>
-                  ) : (
-                    <Alert>
-                      <AlertDescription>
-                        No text available for this selection.
-                      </AlertDescription>
-                    </Alert>
+              {/* Only show content when not fetching and no error */}
+              {!isFetchingMetadata && !isFetchingText && !textError && !metadataError && selectedMantra > 0 && (
+                <div className="space-y-6">
+                  {/* Metadata Header */}
+                  {hasValidText(metadata) && (
+                    <MantraMetadataHeader metadata={metadata!} />
                   )}
+
+                  {/* Mantra Text */}
+                  <div className="prose prose-lg max-w-none dark:prose-invert">
+                    {hasValidText(mantraText) ? (
+                      <p className="text-lg leading-relaxed text-foreground whitespace-pre-wrap font-medium">
+                        {mantraText}
+                      </p>
+                    ) : (
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          No text is available for <strong>{vedaLabel}</strong>, Mantra <strong>{selectedMantra}</strong>, in <strong>{languageLabel}</strong>. This combination may not exist in the database yet.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
                 </div>
               )}
 
               {selectedMantra === 0 && !isLoadingNumbers && (
                 <Alert>
+                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     Please select a mantra to view its text.
                   </AlertDescription>
@@ -284,8 +328,13 @@ function App() {
             </CardContent>
           </Card>
 
+          {/* Audio Section - Only for Samaveda Mantra 47 */}
+          {shouldShowAudio && (
+            <MantraAudioSection veda={selectedVeda} mantraNumber={selectedMantra} />
+          )}
+
           {/* Meaning Display */}
-          <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+          <Card className="mb-8 shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-xl">Meaning</CardTitle>
               <CardDescription>
@@ -295,12 +344,14 @@ function App() {
             <CardContent>
               {meaningError && (
                 <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     Error loading mantra meaning. Please try again.
                   </AlertDescription>
                 </Alert>
               )}
 
+              {/* Show loading state during fetch */}
               {isFetchingMeaning && selectedMantra > 0 && (
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-full" />
@@ -309,6 +360,7 @@ function App() {
                 </div>
               )}
 
+              {/* Only show content when not fetching and no error */}
               {!isFetchingMeaning && !meaningError && selectedMantra > 0 && (
                 <div className="prose prose-lg max-w-none dark:prose-invert">
                   {hasValidText(meaning) ? (
@@ -317,8 +369,9 @@ function App() {
                     </p>
                   ) : (
                     <Alert>
+                      <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        No meaning available for this selection.
+                        No meaning is available for <strong>{vedaLabel}</strong>, Mantra <strong>{selectedMantra}</strong>, in <strong>{languageLabel}</strong>. This combination may not exist in the database yet.
                       </AlertDescription>
                     </Alert>
                   )}
@@ -327,6 +380,7 @@ function App() {
 
               {selectedMantra === 0 && !isLoadingNumbers && (
                 <Alert>
+                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     Please select a mantra to view its meaning.
                   </AlertDescription>
@@ -337,7 +391,7 @@ function App() {
         </main>
 
         {/* Footer */}
-        <footer className="mt-16 border-t border-border/40 bg-card/30 backdrop-blur-sm">
+        <footer className="border-t border-border/40 bg-card/50 backdrop-blur-sm mt-16">
           <div className="container mx-auto px-4 py-6">
             <p className="text-center text-sm text-muted-foreground">
               © 2026. Built with love using{' '}

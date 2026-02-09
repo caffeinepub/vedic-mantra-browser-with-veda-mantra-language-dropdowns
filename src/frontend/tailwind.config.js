@@ -84,6 +84,11 @@ export default {
                     'accent-foreground': 'oklch(var(--sidebar-accent-foreground))',
                     border: 'oklch(var(--sidebar-border))',
                     ring: 'oklch(var(--sidebar-ring))'
+                },
+                metadata: {
+                    bg: 'oklch(var(--metadata-bg))',
+                    border: 'oklch(var(--metadata-border))',
+                    label: 'oklch(var(--metadata-label))'
                 }
             },
             borderRadius: {

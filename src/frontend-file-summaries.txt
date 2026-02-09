@@ -1,6 +1,8 @@
 {
-  "frontend/src/hooks/useQueries.ts": "React Query hooks for fetching mantra numbers, text, and meanings with proper null handling to ensure empty results are normalized to null rather than undefined.",
-  "frontend/src/App.tsx": "Main single-page application with three dropdowns (Veda, Mantra, Language) displaying both mantra text and meaning in separate cards; uses isFetching for loading states, resets mantra selection on Veda change, includes deep-link support, and treats empty/whitespace-only strings as missing content with hasValidText() helper.",
-  "frontend/src/index.css": "Global styles with warm parchment-inspired OKLCH color palette for light mode and rich dark tones for dark mode, avoiding blue/purple dominance.",
-  "frontend/tailwind.config.js": "Tailwind configuration extending the theme with custom color tokens, typography, and design system utilities for the Vedic mantra browser."
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for fetching mantra data (numbers, text, meanings, metadata, audio) and uploading audio files with proper cache invalidation and error handling.",
+  "frontend/src/App.tsx": "Main single-page application with Veda/Mantra/Language selection, displaying mantra metadata, text, audio section (for Samaveda Mantra 47 only, now positioned between text and meaning), and meaning in the correct visual order.",
+  "frontend/src/index.css": "Global styles with warm parchment-inspired OKLCH color palette for light mode and rich dark tones for dark mode, including new metadata header styling with light-green tint and label emphasis tokens.",
+  "frontend/tailwind.config.js": "Tailwind configuration extending the theme with custom color tokens including new metadata color utilities (bg, border, label), typography, and design system utilities for the Vedic mantra browser.",
+  "frontend/src/components/MantraMetadataHeader.tsx": "Dedicated component that renders mantra metadata with emphasized labels (tokens ending with ':') and a light-green tinted background, preserving exact backend text.",
+  "frontend/src/components/MantraAudioSection.tsx": "Dedicated audio section component that displays an HTML audio player for existing audio, provides file upload controls with progress tracking, and shows appropriate loading/empty/error states."
 }

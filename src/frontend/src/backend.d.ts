@@ -7,6 +7,13 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export class ExternalBlob {
+    getBytes(): Promise<Uint8Array<ArrayBuffer>>;
+    getDirectURL(): string;
+    static fromURL(url: string): ExternalBlob;
+    static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
+    withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
+}
 export enum Language {
     hindi = "hindi",
     telugu = "telugu",
@@ -19,7 +26,10 @@ export enum Veda {
     rikVeda = "rikVeda"
 }
 export interface backendInterface {
+    addMantraAudioFile(veda: Veda, mantraNumber: bigint, blob: ExternalBlob): Promise<void>;
+    getMantraAudioFile(veda: Veda, mantraNumber: bigint): Promise<ExternalBlob | null>;
     getMantraMeaning(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;
+    getMantraMetadata(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;
     getMantraNumbers(veda: Veda): Promise<Array<bigint>>;
     getMantraText(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;
 }

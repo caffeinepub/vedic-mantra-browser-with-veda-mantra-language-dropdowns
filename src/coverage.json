@@ -1,44 +1,34 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T00:53:11.541Z",
+  "generatedAt": "2026-02-09T03:12:10.925Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
+    "total": 1,
     "implemented": 1,
     "items": [
       {
-        "id": "REQ-24",
-        "summary": "Fix the frontend so that when the user selects Language = English or Language = Telugu from the Language dropdown, the Mantra Text Display section renders the mantra text returned by the backend for the current (Veda, Mantra Number) selection (and does not remain empty or show \"No text available\" when valid text exists).",
+        "id": "REQ-49",
+        "summary": "Update the single-page UI layout so that when the Audio section is shown (currently only for Veda = Samaveda and Mantra Number = 47), it renders directly below the Mantra Text section (i.e., after the mantra text content card) and before the Meaning section, instead of rendering below the Meaning card. Preserve all existing Audio section behavior (upload, playback, loading/error/empty states) and keep all existing user-facing text in English.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
           "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/App.tsx"
         ]
-      },
-      {
-        "id": "REQ-25",
-        "summary": "Fix the backend data/state so that getMantraText(#samaVeda, 47, #english) and getMantraText(#samaVeda, 47, #telugu) return non-empty mantra text values (not the meaning), and ensure this correction is applied to already-deployed canister state via a conditional migration if needed (without changing the public query APIs).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/App.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

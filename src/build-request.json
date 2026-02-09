@@ -1,67 +1,38 @@
 {
   "kind": "build_request",
-  "title": "Fix missing English/Telugu mantra text when switching language dropdown",
+  "title": "Move Audio section to render directly below Mantra text (above Meaning)",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-24",
-      "text": "Fix the frontend so that when the user selects Language = English or Language = Telugu from the Language dropdown, the Mantra Text Display section renders the mantra text returned by the backend for the current (Veda, Mantra Number) selection (and does not remain empty or show \"No text available\" when valid text exists).",
+      "id": "REQ-49",
+      "text": "Update the single-page UI layout so that when the Audio section is shown (currently only for Veda = Samaveda and Mantra Number = 47), it renders directly below the Mantra Text section (i.e., after the mantra text content card) and before the Meaning section, instead of rendering below the Meaning card. Preserve all existing Audio section behavior (upload, playback, loading/error/empty states) and keep all existing user-facing text in English.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-4"
         ],
         "quotes": [
-          "I can't see the mantra in english and telugu in the content, once we select the english or telugu from the dropdown"
+          "Audio should be displayed below the mantra but now it shows below the meaning"
         ]
       },
       "acceptanceCriteria": [
-        "Given Veda = Samaveda and Mantra Number = 47, switching Language between English and Telugu updates the Mantra Text Display section to show non-empty text for the selected language.",
-        "Switching Language between English and Telugu does not require a page refresh; the text updates as a result of changing the dropdown selection.",
-        "The Mantra Text Display section shows the same loading/error UI patterns as the rest of the app while fetching, and does not show stale text from the previously selected language."
-      ]
-    },
-    {
-      "id": "REQ-25",
-      "text": "Fix the backend data/state so that getMantraText(#samaVeda, 47, #english) and getMantraText(#samaVeda, 47, #telugu) return non-empty mantra text values (not the meaning), and ensure this correction is applied to already-deployed canister state via a conditional migration if needed (without changing the public query APIs).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "I can't see the mantra in english and telugu in the content, once we select the english or telugu from the dropdown"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Calling getMantraText(#samaVeda, 47, #english) returns ?Text with a non-empty value.",
-        "Calling getMantraText(#samaVeda, 47, #telugu) returns ?Text with a non-empty value.",
-        "Calling getMantraMeaning(#samaVeda, 47, #english) and getMantraMeaning(#samaVeda, 47, #telugu) continues to return the meaning (not the mantra text).",
-        "After an upgrade (when existing state is present), the fix is applied automatically via conditional migration so that the frontend can display English/Telugu mantra text for Samaveda 47."
+        "When selecting Veda = Samaveda and Mantra Number = 47, the Audio card appears visually below the Mantra Text card and above the Meaning card.",
+        "When selecting any other (Veda, Mantra Number) combination, the Audio section is not rendered (same behavior as today).",
+        "No existing audio functionality regresses: audio fetch/playback still works when audio exists; upload/replace still works; loading/error/empty states render as before."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo; only add/update backend/migration.mo if a state upgrade is required.",
-    "Do not modify files under frontend/src/components/ui or any frontend immutablePaths (compose existing UI components instead).",
-    "Use English for any user-facing text in the UI and in this build request."
+    "Frontend files listed as immutable in SYSTEM_CONTEXT must not be modified.",
+    "Keep all user-facing text in English."
   ],
   "nonGoals": [
-    "Adding new languages or changing the existing dropdown options.",
-    "Changing URL/deep-link behavior beyond what is needed to fix the missing text rendering."
+    "Do not change backend audio storage APIs or data models.",
+    "Do not change which mantras/vedas show the Audio section (still only Samaveda mantra 47 unless separately requested).",
+    "Do not redesign the Audio component UI beyond what is necessary to move its placement in the page."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

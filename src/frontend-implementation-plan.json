@@ -1,26 +1,21 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix mantra text rendering when switching English/Telugu",
+  "title": "Reorder Audio section to appear between Mantra Text and Meaning",
   "requirements": [
     {
-      "id": "REQ-24",
-      "summary": "Ensure mantra text updates (and is not treated as empty) when switching Language to English or Telugu for the current Veda/Mantra selection.",
+      "id": "REQ-49",
+      "summary": "Move the conditional Audio section so it renders directly below the Mantra Text card and above the Meaning card, without changing when it appears or any audio behavior/text.",
       "acceptanceCriteria": [
-        "Given Veda = Samaveda and Mantra Number = 47, switching Language between English and Telugu updates the Mantra Text Display section to show non-empty text for the selected language.",
-        "Switching Language between English and Telugu does not require a page refresh; the text updates as a result of changing the dropdown selection.",
-        "The Mantra Text Display section shows the same loading/error UI patterns as the rest of the app while fetching, and does not show stale text from the previously selected language."
+        "When selecting Veda = Samaveda and Mantra Number = 47, the Audio card appears visually below the Mantra Text card and above the Meaning card.",
+        "When selecting any other (Veda, Mantra Number) combination, the Audio section is not rendered (same behavior as today).",
+        "No existing audio functionality regresses: audio fetch/playback still works when audio exists; upload/replace still works; loading/error/empty states render as before."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Normalize/unwrap the backend return shape for getMantraText/getMantraMeaning so the hooks always resolve to a real string or null (handling possible optional encodings such as null, []/[text], or {__kind__: 'Some'|'None'}), and keep React Query keys dependent on (veda, mantraNumber, language) so switching English/Telugu reliably refetches and renders text. Verify the component's usage instructions before implementing."
-        },
-        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Update the Mantra Text Display rendering guard to be robust to any unexpected non-string values (treat as 'no text' rather than rendering 'No text available' when valid text exists), while preserving the existing shadcn/ui-based loading and error patterns (Select, Card, Alert, Skeleton) and ensuring language-switch fetches do not show stale text. Verify the component's usage instructions before implementing."
+          "description": "Reorder the JSX in the single-page layout to render <MantraAudioSection> (still gated by the existing shouldShowAudio condition: Samaveda + mantra 47) immediately after the Mantra Text card and before the Meaning card; keep all user-facing text unchanged (English). Ensure the moved section still uses the existing blob-storage ExternalBlob-based behavior via MantraAudioSection (direct URL playback + upload progress), and that no loading/error/empty states change. Verify the component's usage instructions before implementing."
         }
       ]
     }

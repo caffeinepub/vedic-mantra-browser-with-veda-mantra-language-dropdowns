@@ -2,20 +2,21 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-frontend-so-that-when-the-user-selects-language-english-or-language-telugu-from-the-language-dropdown-the-mantra-text-display-section-renders-the-mantra-text-returned-by-the-backend-for-the-current-veda-mantra-number-selection-and-does-not-remain-empty-or-show-no-text-available-when-valid-text-exists",
-      "featureTitle": "Fix the frontend so that when the user selects Language = English or Language = Telugu from the Language dropdown, the Mantra Text Display section renders the mantra text returned by the backend for the current (Veda, Mantra Number) selection (and does not remain empty or show \"No text available\" when valid text exists).",
+      "featureId": "feature-update-the-single-page-ui-layout-so-that-when-the-audio-section-is-shown-currently-only-for-veda-samaveda-and-mantra-number-47-it-renders-directly-below-the-mantra-text-section-i-e-after-the-mantra-text-content-card-and-before-the-meaning-section-instead-of-rendering-below-the-meaning-card-preserve-all-existing-audio-section-behavior-upload-playback-loading-error-empty-states-and-keep-all-existing-user-facing-text-in-english",
+      "featureTitle": "Update the single-page UI layout so that when the Audio section is shown (currently only for Veda = Samaveda and Mantra Number = 47), it renders directly below the Mantra Text section (i.e., after the mantra text content card) and before the Meaning section, instead of rendering below the Meaning card. Preserve all existing Audio section behavior (upload, playback, loading/error/empty states) and keep all existing user-facing text in English.",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/App.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-24"
+        "REQ-49"
       ],
       "confidence": "high"
     }

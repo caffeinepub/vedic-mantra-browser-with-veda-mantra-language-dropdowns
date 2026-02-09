@@ -1,50 +1,32 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T00:53:11.539Z",
-  "summary": "REQ-25 backend fix is not implemented: no evidence that Samaveda #47 English/Telugu mantra text data is corrected or migrated for existing state. REQ-24 frontend fix is only partially evidenced (a new React Query hook exists), but the diff summary does not provide concrete evidence that the Mantra Text Display reliably updates on language switch with correct loading/stale-text handling.",
-  "missing_requirements": [
-    {
-      "id": "REQ-24",
-      "requirement": "When switching Language = English/Telugu, the Mantra Text Display must render the backend-returned mantra text for the current (Veda, Mantra Number) without page refresh, using consistent loading/error patterns and not showing stale text.",
-      "reason": "The diff shows a new useMantraText hook with a language-specific queryKey, but does not include the actual UI/component changes for the Mantra Text Display section (e.g., wiring the hook into the display, clearing stale text on language change, and matching loading/error UI patterns). The App.tsx changes are only described in a high-level file summary, not evidenced by code in the diff excerpt.",
-      "evidence": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend-file-summaries.txt (mentions App.tsx behavior but no code excerpt)"
-      ]
-    },
-    {
-      "id": "REQ-25",
-      "requirement": "Fix backend so getMantraText(#samaVeda, 47, #english) and getMantraText(#samaVeda, 47, #telugu) return non-empty mantra text (not meaning), keep getMantraMeaning returning meaning, and apply the correction to already-deployed state via conditional migration if needed, without changing public query APIs.",
-      "reason": "backend/main.mo defines an empty in-memory mantras map (Map.empty) with no data population shown, so there is no evidence that Samaveda 47 has non-empty English/Telugu text in state. backend/migration.mo is a no-op (returns old state unchanged), so there is no conditional migration applying any correction to existing deployed state.",
-      "evidence": [
-        "backend/main.mo",
-        "backend/migration.mo"
-      ]
-    }
-  ],
+  "generatedAt": "2026-02-09T03:12:10.922Z",
+  "summary": "REQ-49 appears implemented: the App layout now places the Audio section (still scoped to Samaveda mantra 47 per the diff summary) between the Mantra Text and Meaning sections. However, the diff also includes unrelated styling/theme changes that were not requested in this BuildRequest.",
+  "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Global visual/theme overhaul (parchment-inspired OKLCH palette, dark mode tones) unrelated to the language-switch text rendering bug fix.",
-      "reason": "Not requested by REQ-24/REQ-25; requirements focus on fixing missing mantra text rendering and backend data/migration for Samaveda 47 English/Telugu.",
+      "description": "Global theme/style changes (new parchment-inspired palette, metadata header styling tokens) beyond what is necessary to move the Audio section placement.",
+      "reason": "BuildRequest explicitly scoped the change to moving the Audio section in the page layout and stated 'Do not redesign the Audio component UI beyond what is necessary to move its placement in the page.' The diff summary indicates broader styling changes unrelated to repositioning.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/index.css described as new palette changes)"
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js",
+        "frontend/src/components/MantraMetadataHeader.tsx",
+        "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "Tailwind theme/design-system extensions (custom color tokens, typography, utilities) unrelated to the requested fix.",
-      "reason": "Not requested by REQ-24/REQ-25; scope is functional bugfix + backend data correction/migration.",
+      "description": "Deep-link parsing logic changes/additions in App.tsx (handling /samaveda/:number and forcing language to English for deep links).",
+      "reason": "Not requested by REQ-49, which is only about repositioning the Audio section relative to Mantra Text and Meaning.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/tailwind.config.js described as extended theme/design system)"
+        "frontend/src/App.tsx"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.66,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/App.tsx",
     "project_state.json"
   ]
 }
