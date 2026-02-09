@@ -1,54 +1,40 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project involves a mantra dropdown/list where mantra 48 should appear, and an Add button that opens a submission template to add the next mantra content.",
+  "summary": "App that displays mantras by Veda, with a mantra-number dropdown fed from backend data.",
   "architectural_notes": [],
   "known_issues": [
-    "Mantra 48 not appearing in the dropdown as expected",
-    "Previous build attempt failed / request could not be completed"
+    "Mantra dropdown is not displaying any mantra numbers (previously missing 48; now missing all entries including 47/48), likely due to frontend pointing at an outdated backend/canister or stale deployment state."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-ensure-the-samaveda-mantra-number-dropdown-includes-mantra-48-when-it-exists-in-backend-data-and-that-selecting-samaveda-shows-mantra-48-as-an-available-option",
-      "title": "Ensure the Samaveda mantra number dropdown includes Mantra 48 when it exists in backend data (and that selecting Samaveda shows Mantra 48 as an available option).",
+      "id": "feature-fix-the-mantra-number-dropdown-so-it-can-populate-as-soon-as-mantra-numbers-are-fetched-even-when-the-veda-dropdown-has-not-been-manually-selected-yet-ensure-the-app-defaults-to-samaveda-on-first-load-when-there-is-no-deep-link-so-the-user-can-immediately-see-available-mantras-including-47-and-48",
+      "title": "Fix the Mantra Number dropdown so it can populate as soon as mantra numbers are fetched, even when the Veda dropdown has not been manually selected yet. Ensure the app defaults to Samaveda on first load (when there is no deep link) so the user can immediately see available mantras (including 47 and 48).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-clearly-visible-add-button-in-the-ui-that-allows-the-user-to-open-the-mantra-content-submission-template-form-to-submit-the-next-mantra-content",
-      "title": "Add a clearly visible \"Add\" button in the UI that allows the user to open the mantra content submission template/form to submit the next mantra content.",
+      "id": "feature-improve-troubleshooting-visibility-when-the-mantra-numbers-query-fails-or-returns-empty-show-a-clear-inline-state-for-the-mantra-number-dropdown-area-for-a-loading-b-error-and-c-empty-results-error-text-must-be-user-facing-english-and-include-an-actionable-suggestion-to-refresh-reload",
+      "title": "Improve troubleshooting visibility when the mantra numbers query fails or returns empty: show a clear inline state for the Mantra Number dropdown area for (a) loading, (b) error, and (c) empty results. Error text must be user-facing English and include an actionable suggestion to refresh/reload.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-when-the-user-submits-a-mantra-content-template-for-a-mantra-number-that-is-not-currently-present-in-the-dropdown-for-that-veda-refresh-the-dropdown-so-the-newly-submitted-mantra-number-becomes-selectable-immediately",
-      "title": "When the user submits a mantra content template for a mantra number that is not currently present in the dropdown for that Veda, refresh the dropdown so the newly submitted mantra number becomes selectable immediately.",
+      "id": "feature-add-a-lightweight-backend-diagnostics-query-method-that-returns-basic-backend-state-needed-to-confirm-the-frontend-is-talking-to-the-expected-deployed-canister-e-g-counts-of-mantras-metadata-entries-and-whether-samaveda-47-and-48-exist-expose-this-information-in-the-frontend-in-a-small-non-intrusive-diagnostics-section-visible-without-authentication",
+      "title": "Add a lightweight backend diagnostics query method that returns basic backend state needed to confirm the frontend is talking to the expected deployed canister (e.g., counts of mantras/metadata entries and whether Samaveda 47 and 48 exist). Expose this information in the frontend in a small, non-intrusive “Diagnostics” section (visible without authentication).",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     }
   ],
-  "new_feature_requests": [
-    {
-      "id": "AR-1",
-      "summary": "Ensure mantra dropdown displays mantra 48 as expected",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Add an Add button; clicking it opens a template/form to submit the next mantra content",
-      "reqIds": [],
-      "status": "pending"
-    }
-  ],
-  "projectName": "Fix Mantra 48 visibility in dropdown and add an Add button that opens the mantra submission template",
+  "new_feature_requests": [],
+  "projectName": "Fix mantra-number dropdown showing no entries (47/48 missing) and add diagnostics for canister/data freshness",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

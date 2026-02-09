@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import { Veda, Language, ExternalBlob } from '../backend';
+import { Veda, Language, ExternalBlob, Diagnostics } from '../backend';
 
 /**
  * Hook to fetch available mantra numbers for a given Veda
  * Uses getAllMantraNumbersForVeda to include both complete mantras and template-only entries
+ * Configured for aggressive refetching to ensure dropdown always shows latest backend data
  */
 export function useMantraNumbers(veda: Veda) {
   const { actor, isFetching: isActorFetching } = useActor();
@@ -15,30 +16,18 @@ export function useMantraNumbers(veda: Veda) {
       if (!actor) return [];
       const numbers = await actor.getAllMantraNumbersForVeda(veda);
       
-      // Sort ascending numerically
-      const sorted = numbers.sort((a, b) => {
+      // Return numbers directly from backend - backend already handles deduplication
+      // Only sort to ensure consistent ascending order
+      return numbers.sort((a, b) => {
         if (a < b) return -1;
         if (a > b) return 1;
         return 0;
       });
-      
-      // De-duplicate: filter out any duplicate bigint values
-      const unique: bigint[] = [];
-      const seen = new Set<string>();
-      
-      for (const num of sorted) {
-        const key = num.toString();
-        if (!seen.has(key)) {
-          seen.add(key);
-          unique.push(num);
-        }
-      }
-      
-      return unique;
     },
     enabled: !!actor && !isActorFetching,
-    staleTime: 0, // Always fetch fresh data to ensure newly added mantras appear
-    refetchOnMount: true, // Refetch when component mounts
+    staleTime: 0, // Always consider data stale to fetch fresh on mount
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    refetchOnMount: 'always', // Always refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window regains focus
     refetchOnReconnect: true, // Refetch when network reconnects
   });
@@ -224,5 +213,25 @@ export function useSubmitMantraTemplate() {
         error.message || 'Failed to submit template. Please try again.'
       );
     },
+  });
+}
+
+/**
+ * Hook to fetch backend diagnostics for debugging data freshness
+ */
+export function useBackendDiagnostics() {
+  const { actor, isFetching: isActorFetching } = useActor();
+
+  return useQuery<Diagnostics>({
+    queryKey: ['backendDiagnostics'],
+    queryFn: async () => {
+      if (!actor) {
+        throw new Error('Backend actor not available');
+      }
+      return await actor.getBackendDiagnostics();
+    },
+    enabled: !!actor && !isActorFetching,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }

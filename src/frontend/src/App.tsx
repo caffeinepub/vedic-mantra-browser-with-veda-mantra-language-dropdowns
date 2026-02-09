@@ -12,11 +12,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BookOpen, Languages, Library, AlertCircle } from 'lucide-react';
+import { BookOpen, Languages, Library, AlertCircle, Loader2 } from 'lucide-react';
 import { MantraMetadataHeader } from './components/MantraMetadataHeader';
 import { MantraAudioSection } from './components/MantraAudioSection';
 import { MantraContentTemplate } from './components/MantraContentTemplate';
 import { ShareArea } from './components/ShareArea';
+import { DiagnosticsPanel } from './components/DiagnosticsPanel';
 
 const VEDA_OPTIONS = [
   { value: 'rikVeda', label: 'Rigveda', slug: 'rigveda', enum: Veda.rikVeda },
@@ -58,12 +59,12 @@ function stringToLanguageEnum(langStr: string): Language {
 
 function App() {
   // All Select state is now string-controlled
-  const [selectedVedaString, setSelectedVedaString] = useState<string>('');
+  // Default to Samaveda when no deep link is present
+  const [selectedVedaString, setSelectedVedaString] = useState<string>('samaVeda');
   const [selectedMantraString, setSelectedMantraString] = useState<string>('');
   const [selectedLanguageString, setSelectedLanguageString] = useState<string>('english');
   const [isDeepLinked, setIsDeepLinked] = useState<boolean>(false);
   const [hasAutoSelected, setHasAutoSelected] = useState<boolean>(false);
-  const [shorthandError, setShorthandError] = useState<string | null>(null);
   const [showTemplateEditor, setShowTemplateEditor] = useState<boolean>(false);
 
   // Parse deep link on initial load - support /<veda-slug>/<number> and /<number>
@@ -144,7 +145,7 @@ function App() {
       { value: 'atharvaVeda', numbers: atharvaVedaNumbers },
     ].filter(v => v.numbers.length > 0);
 
-    if (vedasWithMantras.length === 1 && !selectedVedaString) {
+    if (vedasWithMantras.length === 1 && selectedVedaString === 'samaVeda' && samaVedaNumbers.length === 0) {
       const onlyVeda = vedasWithMantras[0];
       setSelectedVedaString(onlyVeda.value);
       setHasAutoSelected(true);
@@ -163,54 +164,15 @@ function App() {
     isDeepLinked,
   ]);
 
-  // Defensive de-duplication and sorting at render time
-  const uniqueSortedMantraNumbers = useMemo(() => {
-    const seen = new Set<string>();
-    const unique: bigint[] = [];
-    
-    for (const num of mantraNumbers) {
-      const key = num.toString();
-      if (!seen.has(key)) {
-        seen.add(key);
-        unique.push(num);
-      }
-    }
-    
-    // Ensure ascending numeric order
-    return unique.sort((a, b) => {
+  // Use mantra numbers directly from backend without additional filtering
+  // Only sort to ensure consistent order
+  const sortedMantraNumbers = useMemo(() => {
+    return [...mantraNumbers].sort((a, b) => {
       if (a < b) return -1;
       if (a > b) return 1;
       return 0;
     });
   }, [mantraNumbers]);
-
-  // Dev-only verification: Check if Mantra 48 is present for Samaveda
-  useEffect(() => {
-    if (import.meta.env.DEV && selectedVedaString === 'samaVeda' && !isLoadingNumbers && uniqueSortedMantraNumbers.length > 0) {
-      const hasMantra48 = uniqueSortedMantraNumbers.some(num => num === 48n);
-      if (!hasMantra48) {
-        console.warn('[DEV] Mantra 48 is missing from Samaveda numbers list. Expected mantras:', uniqueSortedMantraNumbers.map(n => n.toString()));
-      } else {
-        console.log('[DEV] Mantra 48 is present in Samaveda numbers list.');
-      }
-    }
-  }, [selectedVedaString, uniqueSortedMantraNumbers, isLoadingNumbers]);
-
-  // Check for shorthand error: mantra not available for Samaveda
-  useEffect(() => {
-    if (isDeepLinked && selectedVedaString === 'samaVeda' && selectedMantraString && !isLoadingNumbers) {
-      const requestedMantra = BigInt(selectedMantraString);
-      const isAvailable = uniqueSortedMantraNumbers.some(num => num === requestedMantra);
-      
-      if (!isAvailable && uniqueSortedMantraNumbers.length > 0) {
-        setShorthandError(
-          `Mantra ${selectedMantraString} is not available for Samaveda. Please select from the available mantras.`
-        );
-      } else {
-        setShorthandError(null);
-      }
-    }
-  }, [isDeepLinked, selectedVedaString, selectedMantraString, uniqueSortedMantraNumbers, isLoadingNumbers]);
 
   // Fetch metadata for selected combination
   const { data: metadata, isFetching: isFetchingMetadata, error: metadataError } = useMantraMetadata(
@@ -238,7 +200,6 @@ function App() {
     setSelectedVedaString(value);
     setSelectedMantraString(''); // Reset to empty string immediately to clear stale content
     setIsDeepLinked(false);
-    setShorthandError(null);
   };
 
   // Handle Language change: ensure UI updates immediately
@@ -248,30 +209,33 @@ function App() {
 
   // Auto-select first mantra when Veda changes (but not if deep-linked)
   useEffect(() => {
-    if (uniqueSortedMantraNumbers.length > 0) {
+    if (sortedMantraNumbers.length > 0) {
       // If deep-linked and the current selection is valid, keep it
       if (isDeepLinked && selectedMantra > 0n) {
         // Check if the deep-linked mantra is in the list
-        const isValidMantra = uniqueSortedMantraNumbers.some(num => num === selectedMantra);
+        const isValidMantra = sortedMantraNumbers.some(num => num === selectedMantra);
         if (isValidMantra) {
           // Keep the deep-linked selection
           return;
         }
-        // If not valid, fall through to auto-select first
+        // If not valid and still loading, wait for data
+        if (isLoadingNumbers) {
+          return;
+        }
+        // If not valid and done loading, fall through to auto-select first
       }
       
       // Auto-select first mantra if no valid selection
-      if (!selectedMantraString || !uniqueSortedMantraNumbers.some(num => num.toString() === selectedMantraString)) {
-        setSelectedMantraString(uniqueSortedMantraNumbers[0].toString());
+      if (!selectedMantraString || !sortedMantraNumbers.some(num => num.toString() === selectedMantraString)) {
+        setSelectedMantraString(sortedMantraNumbers[0].toString());
       }
     }
-  }, [uniqueSortedMantraNumbers, selectedMantraString, isDeepLinked, selectedMantra]);
+  }, [sortedMantraNumbers, selectedMantraString, isDeepLinked, selectedMantra, isLoadingNumbers]);
 
   // Handle mantra selection change
   const handleMantraChange = (value: string) => {
     setSelectedMantraString(value);
     setIsDeepLinked(false);
-    setShorthandError(null);
     
     // Update URL to reflect selection
     const slug = vedaStringToSlug(selectedVedaString);
@@ -285,6 +249,13 @@ function App() {
 
   // Check if any query returned an error
   const hasError = textError || meaningError || metadataError || numbersError;
+
+  // Check if deep-linked mantra is unavailable (only show error after numbers finish loading)
+  const showUnavailableError = isDeepLinked && 
+    selectedMantra > 0n && 
+    !isLoadingNumbers && 
+    sortedMantraNumbers.length > 0 && 
+    !sortedMantraNumbers.some(num => num === selectedMantra);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -336,22 +307,41 @@ function App() {
               {/* Mantra Number Selection */}
               <div className="space-y-2">
                 <Label htmlFor="mantra-select">Mantra Number</Label>
-                <Select
-                  value={selectedMantraString}
-                  onValueChange={handleMantraChange}
-                  disabled={!selectedVedaString || isLoadingNumbers}
-                >
-                  <SelectTrigger id="mantra-select">
-                    <SelectValue placeholder={isLoadingNumbers ? 'Loading...' : 'Select a mantra'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {uniqueSortedMantraNumbers.map((num) => (
-                      <SelectItem key={num.toString()} value={num.toString()}>
-                        Mantra {num.toString()}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {isLoadingNumbers ? (
+                  <div className="flex items-center gap-2 h-10 px-3 py-2 border border-input rounded-md bg-muted/50">
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Loading mantras...</span>
+                  </div>
+                ) : numbersError ? (
+                  <Alert variant="destructive" className="py-2">
+                    <AlertDescription className="text-xs">
+                      Failed to load mantra numbers. Please refresh the page.
+                    </AlertDescription>
+                  </Alert>
+                ) : sortedMantraNumbers.length === 0 ? (
+                  <Alert className="py-2">
+                    <AlertDescription className="text-xs">
+                      No mantras available for this Veda.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <Select
+                    value={selectedMantraString}
+                    onValueChange={handleMantraChange}
+                    disabled={isLoadingNumbers}
+                  >
+                    <SelectTrigger id="mantra-select">
+                      <SelectValue placeholder="Select a mantra" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sortedMantraNumbers.map((num) => (
+                        <SelectItem key={num.toString()} value={num.toString()}>
+                          Mantra {num.toString()}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               {/* Language Selection */}
@@ -377,15 +367,17 @@ function App() {
           </CardContent>
         </Card>
 
-        {/* Error Display */}
-        {shorthandError && (
+        {/* Error Display - only show after numbers finish loading */}
+        {showUnavailableError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{shorthandError}</AlertDescription>
+            <AlertDescription>
+              Mantra {selectedMantraString} is not available for {VEDA_OPTIONS.find(v => v.value === selectedVedaString)?.label}. Please select from the available mantras in the dropdown.
+            </AlertDescription>
           </Alert>
         )}
 
-        {hasError && !shorthandError && (
+        {hasError && !showUnavailableError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -395,7 +387,7 @@ function App() {
         )}
 
         {/* Mantra Content Display */}
-        {selectedVedaString && selectedMantraString && !shorthandError && (
+        {selectedVedaString && selectedMantraString && !showUnavailableError && (
           <>
             {isLoading ? (
               <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
@@ -458,8 +450,8 @@ function App() {
           </>
         )}
 
-        {/* Mantra Content Template - Always visible in production with Add button */}
-        {selectedVedaString && selectedMantraString && !shorthandError && (
+        {/* Template Editor - Always visible when veda and mantra are selected */}
+        {selectedVedaString && selectedMantra > 0n && (
           <MantraContentTemplate
             veda={selectedVeda}
             mantraNumber={selectedMantra}
@@ -467,22 +459,25 @@ function App() {
             onOpenChange={setShowTemplateEditor}
           />
         )}
+
+        {/* Diagnostics Panel */}
+        <DiagnosticsPanel />
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 bg-card/50 backdrop-blur-sm mt-16">
+      <footer className="border-t border-border/40 bg-card/30 backdrop-blur-sm mt-16">
         <div className="container mx-auto px-4 py-6">
-          <p className="text-center text-sm text-muted-foreground">
-            © 2026. Built with love using{' '}
+          <div className="text-center text-sm text-muted-foreground">
+            © {new Date().getFullYear()}. Built with love using{' '}
             <a
-              href="https://caffeine.ai"
+              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
               caffeine.ai
             </a>
-          </p>
+          </div>
         </div>
       </footer>
     </div>

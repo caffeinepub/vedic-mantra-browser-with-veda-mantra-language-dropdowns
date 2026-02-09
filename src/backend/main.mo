@@ -308,4 +308,20 @@ actor {
 
     await getMantraNumbers(veda);
   };
+
+  type Diagnostics = {
+    mantraCount : Nat;
+    metadataCount : Nat;
+    samaveda47Exists : Bool;
+    samaveda48Exists : Bool;
+  };
+
+  public query ({ caller }) func getBackendDiagnostics() : async Diagnostics {
+    {
+      mantraCount = mantras.size();
+      metadataCount = mantraMetadata.size();
+      samaveda47Exists = mantras.containsKey({ veda = #samaVeda; mantraNumber = 47 });
+      samaveda48Exists = mantras.containsKey({ veda = #samaVeda; mantraNumber = 48 });
+    };
+  };
 };

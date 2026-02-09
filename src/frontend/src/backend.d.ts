@@ -14,6 +14,12 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
+export interface Diagnostics {
+    samaveda48Exists: boolean;
+    mantraCount: bigint;
+    metadataCount: bigint;
+    samaveda47Exists: boolean;
+}
 export enum Language {
     hindi = "hindi",
     telugu = "telugu",
@@ -28,6 +34,7 @@ export enum Veda {
 export interface backendInterface {
     addMantraAudioFile(veda: Veda, mantraNumber: bigint, blob: ExternalBlob): Promise<void>;
     getAllMantraNumbersForVeda(veda: Veda): Promise<Array<bigint>>;
+    getBackendDiagnostics(): Promise<Diagnostics>;
     getMantraAudioFile(veda: Veda, mantraNumber: bigint): Promise<ExternalBlob | null>;
     getMantraMeaning(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;
     getMantraMetadata(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;

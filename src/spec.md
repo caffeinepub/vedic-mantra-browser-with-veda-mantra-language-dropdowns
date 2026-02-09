@@ -1,11 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Make Samaveda Mantra 48 selectable when present, and add an “Add” button to open a mantra submission template that refreshes the dropdown after successful submission.
+**Goal:** Ensure the Mantra Number dropdown reliably populates on first load (including Samaveda 47/48) and add clear UI + backend diagnostics to verify data freshness and canister connectivity.
 
 **Planned changes:**
-- Fix mantra number retrieval/mapping so Samaveda’s Mantra Number dropdown includes “Mantra 48” when it exists in backend data, and selecting it routes to `/samaveda/48` and loads its content.
-- Add a production-visible “Add” button near the mantra selection UI that opens the mantra content submission template/form only when clicked, with a close action that returns to the main view without changing the current selection.
-- After a successful submission (especially for a new mantra number not previously listed), refresh the mantra numbers for the currently selected Veda so the new number appears immediately in the dropdown; ensure validation/error messages during submission are in English.
+- Frontend: Default the Veda selection to **Samaveda** on first load when there is no deep link, and enable/populate the Mantra Number dropdown as soon as mantra numbers finish loading (without requiring the user to manually re-select Veda).
+- Frontend: Keep current behavior where changing Veda resets the selected mantra, but prevent the mantra dropdown from remaining permanently disabled after a Veda change.
+- Frontend: Add explicit inline states in the Mantra Number area for **loading**, **error** (with user-facing English + suggestion to refresh/reload), and **empty results** (clear “no mantras available” message).
+- Backend: Add a lightweight **query** method returning basic diagnostics (counts and booleans indicating whether Samaveda 47 and 48 exist) to confirm the frontend is talking to the expected deployed canister/data.
+- Frontend: Display the diagnostics response in a small, non-intrusive Diagnostics section on the main page (no authentication required), with a simple English error line if the diagnostics query fails.
 
-**User-visible outcome:** Users can select “Mantra 48” for Samaveda when available, open a submission template via an “Add” button to submit the next mantra content, and see newly added mantra numbers appear in the dropdown right after submission without a hard refresh.
+**User-visible outcome:** On a fresh visit the app immediately shows Samaveda mantras (including 47 and 48 when present), the mantra selector clearly indicates loading/error/empty states instead of appearing blank, and a Diagnostics panel helps confirm backend connectivity and whether key mantras exist.

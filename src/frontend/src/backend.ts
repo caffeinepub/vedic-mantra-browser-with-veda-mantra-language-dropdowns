@@ -89,6 +89,15 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface Diagnostics {
+    samaveda48Exists: boolean;
+    mantraCount: bigint;
+    metadataCount: bigint;
+    samaveda47Exists: boolean;
+}
+export interface _CaffeineStorageRefillInformation {
+    proposed_top_up_amount?: bigint;
+}
 export interface _CaffeineStorageCreateCertificateResult {
     method: string;
     blob_hash: string;
@@ -96,9 +105,6 @@ export interface _CaffeineStorageCreateCertificateResult {
 export interface _CaffeineStorageRefillResult {
     success?: boolean;
     topped_up_amount?: bigint;
-}
-export interface _CaffeineStorageRefillInformation {
-    proposed_top_up_amount?: bigint;
 }
 export enum Language {
     hindi = "hindi",
@@ -120,6 +126,7 @@ export interface backendInterface {
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     addMantraAudioFile(veda: Veda, mantraNumber: bigint, blob: ExternalBlob): Promise<void>;
     getAllMantraNumbersForVeda(veda: Veda): Promise<Array<bigint>>;
+    getBackendDiagnostics(): Promise<Diagnostics>;
     getMantraAudioFile(veda: Veda, mantraNumber: bigint): Promise<ExternalBlob | null>;
     getMantraMeaning(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;
     getMantraMetadata(veda: Veda, mantraNumber: bigint, language: Language): Promise<string | null>;
@@ -240,6 +247,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getAllMantraNumbersForVeda(to_candid_Veda_n8(this._uploadFile, this._downloadFile, arg0));
+            return result;
+        }
+    }
+    async getBackendDiagnostics(): Promise<Diagnostics> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBackendDiagnostics();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBackendDiagnostics();
             return result;
         }
     }

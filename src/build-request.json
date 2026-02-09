@@ -1,85 +1,75 @@
 {
   "kind": "build_request",
-  "title": "Fix Mantra 48 visibility in dropdown and add an Add button that opens the mantra submission template",
-  "priority": "normal",
+  "title": "Fix mantra-number dropdown showing no entries (47/48 missing) and add diagnostics for canister/data freshness",
+  "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Ensure the Samaveda mantra number dropdown includes Mantra 48 when it exists in backend data (and that selecting Samaveda shows Mantra 48 as an available option).",
-      "target": "both",
+      "text": "Fix the Mantra Number dropdown so it can populate as soon as mantra numbers are fetched, even when the Veda dropdown has not been manually selected yet. Ensure the app defaults to Samaveda on first load (when there is no deep link) so the user can immediately see available mantras (including 47 and 48).",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "Not seeing 48 mantra in the dropdown;"
+          "Now I'm not seeing any mantra in the dropdown either 47 or 48"
         ]
       },
       "acceptanceCriteria": [
-        "When Veda = Samaveda, the Mantra Number dropdown includes an option labeled \"Mantra 48\".",
-        "Selecting \"Mantra 48\" updates the URL to /samaveda/48 and loads the corresponding content if available.",
-        "If the backend contains Samaveda mantra 48, the backend getMantraNumbers(Samaveda) response includes 48."
+        "On a fresh load with no deep-link URL, the Veda selection defaults to Samaveda and the Mantra Number dropdown is enabled once numbers finish loading.",
+        "For Samaveda, the Mantra Number dropdown shows at least Mantra 47 and Mantra 48 (based on the current backend data).",
+        "Changing the selected Veda still resets the selected mantra as it does today, without leaving the mantra dropdown permanently disabled."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Add a clearly visible \"Add\" button in the UI that allows the user to open the mantra content submission template/form to submit the next mantra content.",
+      "text": "Improve troubleshooting visibility when the mantra numbers query fails or returns empty: show a clear inline state for the Mantra Number dropdown area for (a) loading, (b) error, and (c) empty results. Error text must be user-facing English and include an actionable suggestion to refresh/reload.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "There should be a add button. When I click the add button the template should open so that I can submit the next mantra content"
+          "Now I'm not seeing any mantra in the dropdown either 47 or 48"
         ]
       },
       "acceptanceCriteria": [
-        "An \"Add\" button is visible in production builds (not only in development) and is discoverable near the mantra selection area.",
-        "Clicking \"Add\" opens the mantra content template/form (it is not shown until the user clicks \"Add\").",
-        "Closing the template/form returns the user to the main view without changing the current mantra selection."
+        "When mantra numbers are loading, the Mantra Number control shows a loading state (not an empty dropdown).",
+        "If fetching mantra numbers fails, the UI shows an error message in the selection card (not only in the console).",
+        "If fetching succeeds but returns an empty list, the UI shows an explicit empty-state message (e.g., “No mantras available for this Veda.”) instead of an empty dropdown list."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "When the user submits a mantra content template for a mantra number that is not currently present in the dropdown for that Veda, refresh the dropdown so the newly submitted mantra number becomes selectable immediately.",
+      "text": "Add a lightweight backend diagnostics query method that returns basic backend state needed to confirm the frontend is talking to the expected deployed canister (e.g., counts of mantras/metadata entries and whether Samaveda 47 and 48 exist). Expose this information in the frontend in a small, non-intrusive “Diagnostics” section (visible without authentication).",
       "target": "both",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-1"
         ],
         "quotes": [
-          "...submit the next mantra content"
+          "Now I'm not seeing any mantra in the dropdown either 47 or 48"
         ]
       },
       "acceptanceCriteria": [
-        "Submitting the template successfully triggers a refresh of the mantra numbers list for the currently selected Veda.",
-        "After successful submission for a new mantra number (e.g., 48), that number appears in the Mantra Number dropdown without requiring a hard refresh.",
-        "All validation and error messages shown to the user during submission are in English."
+        "Backend exposes a new query method that returns diagnostics sufficient to confirm that Samaveda mantras 47 and 48 are present (true/false) and includes basic counts.",
+        "Frontend displays the returned diagnostics data somewhere on the main page (collapsed panel or small card) without requiring login.",
+        "If the diagnostics query fails, the frontend shows a simple English error line in the diagnostics area."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in backend/main.mo (no additional backend services).",
-    "Do not edit files under frontend/src/components/ui or any other immutable frontend paths listed in SYSTEM_CONTEXT.",
-    "Use English for any user-facing text."
+    "Do not edit any files under frontend/src/components/ui (compose existing shadcn components instead).",
+    "Do not modify immutable hook files (frontend/src/hooks/useInternetIdentity.ts / .tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
+    "Backend must remain a single Motoko actor in backend/main.mo; only add migration.mo if state schema changes require it (avoid if possible)."
   ],
   "nonGoals": [
-    "Adding third-party authentication providers (only Internet Identity is allowed).",
-    "Adding real-time updates via WebSockets or push notifications.",
-    "Introducing external databases or off-canister storage beyond what is already used."
+    "Adding new mantra content beyond what is already present in the backend.",
+    "Adding new authentication methods beyond Internet Identity.",
+    "Implementing real-time updates (e.g., websockets) for dropdown contents."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

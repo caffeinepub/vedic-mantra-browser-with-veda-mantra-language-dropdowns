@@ -26,6 +26,12 @@ export const Veda = IDL.Variant({
   'rikVeda' : IDL.Null,
 });
 export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const Diagnostics = IDL.Record({
+  'samaveda48Exists' : IDL.Bool,
+  'mantraCount' : IDL.Nat,
+  'metadataCount' : IDL.Nat,
+  'samaveda47Exists' : IDL.Bool,
+});
 export const Language = IDL.Variant({
   'hindi' : IDL.Null,
   'telugu' : IDL.Null,
@@ -65,6 +71,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Nat)],
       ['query'],
     ),
+  'getBackendDiagnostics' : IDL.Func([], [Diagnostics], ['query']),
   'getMantraAudioFile' : IDL.Func(
       [Veda, IDL.Nat],
       [IDL.Opt(ExternalBlob)],
@@ -119,6 +126,12 @@ export const idlFactory = ({ IDL }) => {
     'rikVeda' : IDL.Null,
   });
   const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const Diagnostics = IDL.Record({
+    'samaveda48Exists' : IDL.Bool,
+    'mantraCount' : IDL.Nat,
+    'metadataCount' : IDL.Nat,
+    'samaveda47Exists' : IDL.Bool,
+  });
   const Language = IDL.Variant({
     'hindi' : IDL.Null,
     'telugu' : IDL.Null,
@@ -158,6 +171,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Nat)],
         ['query'],
       ),
+    'getBackendDiagnostics' : IDL.Func([], [Diagnostics], ['query']),
     'getMantraAudioFile' : IDL.Func(
         [Veda, IDL.Nat],
         [IDL.Opt(ExternalBlob)],

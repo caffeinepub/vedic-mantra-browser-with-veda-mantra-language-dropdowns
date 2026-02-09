@@ -10,6 +10,12 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Diagnostics {
+  'samaveda48Exists' : boolean,
+  'mantraCount' : bigint,
+  'metadataCount' : bigint,
+  'samaveda47Exists' : boolean,
+}
 export type ExternalBlob = Uint8Array;
 export type Language = { 'hindi' : null } |
   { 'telugu' : null } |
@@ -47,6 +53,7 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   'addMantraAudioFile' : ActorMethod<[Veda, bigint, ExternalBlob], undefined>,
   'getAllMantraNumbersForVeda' : ActorMethod<[Veda], Array<bigint>>,
+  'getBackendDiagnostics' : ActorMethod<[], Diagnostics>,
   'getMantraAudioFile' : ActorMethod<[Veda, bigint], [] | [ExternalBlob]>,
   'getMantraMeaning' : ActorMethod<[Veda, bigint, Language], [] | [string]>,
   'getMantraMetadata' : ActorMethod<[Veda, bigint, Language], [] | [string]>,

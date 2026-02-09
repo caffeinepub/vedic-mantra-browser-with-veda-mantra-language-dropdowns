@@ -1,68 +1,69 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T14:24:23.614Z",
-  "summary": "REQ-2 and REQ-3 appear implemented on the frontend via an Add button that toggles the template editor and React Query invalidation/refetch behavior for mantra numbers after submission. REQ-1 is partially addressed by adding Samaveda mantra 48 data in the backend and updating the frontend to fetch a broader mantra-number list, but the diff summary does not clearly show that the backend function explicitly required by the AC (getMantraNumbers(Samaveda)) now returns 48.",
+  "generatedAt": "2026-02-09T15:13:11.195Z",
+  "summary": "REQ-1 and REQ-2 appear to be implemented in the frontend (default Samaveda, improved loading/error/empty handling for mantra numbers) and Samaveda mantras 47/48 were added/ensured in the backend data. A frontend DiagnosticsPanel was added, but the diff summary does not provide evidence that the backend diagnostics query method required by REQ-3 was actually implemented in backend/main.mo (only mantra data additions are shown). Several additional features/files were added that were not requested (deployment scripts/docs, SPA redirect/404 handling, styling/theme changes, template editor-related changes, etc.).",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "If the backend contains Samaveda mantra 48, the backend getMantraNumbers(Samaveda) response includes 48.",
-      "reason": "The diff shows Samaveda mantra 48 added to the backend data and the frontend switched to calling getAllMantraNumbersForVeda, but it does not show any change or evidence that the specific backend method getMantraNumbers(Samaveda) exists and/or returns 48 as required by the acceptance criteria.",
+      "id": "REQ-3",
+      "requirement": "Backend exposes a new query method that returns diagnostics sufficient to confirm that Samaveda mantras 47 and 48 are present (true/false) and includes basic counts.",
+      "reason": "The diff shows a new frontend DiagnosticsPanel and references a `useBackendDiagnostics` hook, but the provided backend/main.mo diff excerpt only shows mantra data additions (Samaveda 47/48) and does not show any new diagnostics query method implementation or type definition on the backend.",
       "evidence": [
-        "backend/main.mo",
-        "frontend/src/hooks/useQueries.ts"
+        "backend/main.mo (truncated excerpt shows mantra entries but no new query method)",
+        "frontend/src/components/DiagnosticsPanel.tsx (calls useBackendDiagnostics, implying backend support is needed)",
+        "frontend/src/hooks/useQueries.ts (mentions new useBackendDiagnostics in summary, but truncated content does not show it nor backend method name)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Internet Identity-gated audio upload/replace feature in the mantra audio section.",
-      "reason": "The request explicitly called out non-goals around auth providers and did not ask for any new audio upload/auth gating behavior; the diff summary describes a new authentication-gated audio upload/replace UI.",
+      "description": "Added SPA deep-link fallback files for static hosting (_redirects and 404.html with redirect query param handling).",
+      "reason": "Not requested (non-goals did not mention routing changes); BuildRequest focuses on dropdown population and diagnostics.",
       "evidence": [
-        "frontend/src/components/MantraAudioSection.tsx"
+        "frontend-file-summaries.txt (frontend/public/_redirects, frontend/public/404.html)",
+        "frontend/src/App.tsx (truncated: parses ?redirect and manipulates history)"
       ]
     },
     {
-      "description": "SPA deep-link fallback infrastructure for static hosting (Netlify-style _redirects and a custom 404.html redirect preservation mechanism).",
-      "reason": "Not requested; this is additional routing/hosting behavior beyond the dropdown visibility and Add/template functionality.",
+      "description": "Added deployment/build shell scripts and extensive deployment documentation updates.",
+      "reason": "Not requested by any REQ; BuildRequest did not ask for new scripts or docs.",
       "evidence": [
-        "frontend/public/_redirects",
-        "frontend/public/404.html",
-        "frontend/src/App.tsx"
+        "frontend-file-summaries.txt (frontend/scripts/build.sh, frontend/scripts/deploy-ic.sh, frontend/DEPLOYMENT.md, frontend/README.md)"
       ]
     },
     {
-      "description": "Share feature that shows current URL with copy-to-clipboard feedback.",
-      "reason": "Not requested in the BuildRequest.",
+      "description": "Introduced/modified global styling and Tailwind theme tokens (parchment-inspired palette, token changes).",
+      "reason": "Not requested; could be incidental but not part of REQ-1/2/3 acceptance criteria.",
       "evidence": [
-        "frontend/src/components/ShareArea.tsx",
-        "frontend/src/App.tsx"
+        "frontend-file-summaries.txt (frontend/src/index.css, frontend/tailwind.config.js)"
       ]
     },
     {
-      "description": "Large visual design/theme changes (new color palette and Tailwind token changes; metadata label styling changes).",
-      "reason": "Not requested; the BuildRequest focuses on dropdown content and Add/template behavior.",
+      "description": "Added select value guard utilities to coerce/validate Select controlled values.",
+      "reason": "Not explicitly requested; REQ-1/2 are about dropdown population and states, not adding a general select guard utility module.",
       "evidence": [
-        "frontend/src/index.css",
-        "frontend/tailwind.config.js",
-        "frontend/src/components/MantraMetadataHeader.tsx"
+        "frontend-file-summaries.txt (frontend/src/utils/selectValueGuards.ts)"
       ]
     },
     {
-      "description": "New build/deploy shell scripts and additional deployment documentation.",
-      "reason": "Not requested; operational tooling/documentation additions are outside the stated requirements.",
+      "description": "Template editor behavior/configuration changes (MantraContentTemplate, template editor toggle via env/dev).",
+      "reason": "Not requested; BuildRequest explicitly lists non-goals around content/auth/real-time, and does not mention adding/editing a template editor feature.",
       "evidence": [
-        "frontend/scripts/build.sh",
-        "frontend/scripts/deploy-ic.sh",
-        "frontend/DEPLOYMENT.md",
-        "frontend/README.md"
+        "frontend-file-summaries.txt (frontend/src/components/MantraContentTemplate.tsx, frontend/README.md)"
       ]
     },
     {
-      "description": "New Select value guard utilities to coerce/validate controlled Select values.",
-      "reason": "Not explicitly requested as part of the dropdown Mantra 48 fix; it may be related, but it is an additional feature beyond the stated requirements.",
+      "description": "ShareArea UX enhancement (copy-to-clipboard success feedback).",
+      "reason": "Not requested by any requirement.",
       "evidence": [
-        "frontend/src/utils/selectValueGuards.ts"
+        "frontend-file-summaries.txt (frontend/src/components/ShareArea.tsx)"
+      ]
+    },
+    {
+      "description": "MantraAudioSection behavior notes about anonymous playback but auth-required upload/replace.",
+      "reason": "Not requested; BuildRequest explicitly lists authentication non-goals beyond II and focuses elsewhere.",
+      "evidence": [
+        "frontend-file-summaries.txt (frontend/src/components/MantraAudioSection.tsx)"
       ]
     }
   ],
@@ -71,7 +72,7 @@
     "backend/main.mo",
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
-    "frontend/src/components/MantraContentTemplate.tsx",
+    "frontend/src/components/DiagnosticsPanel.tsx",
     "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]

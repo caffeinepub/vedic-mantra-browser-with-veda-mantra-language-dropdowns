@@ -1,73 +1,63 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix Samaveda Mantra 48 dropdown visibility and add production Add button to open submission template",
+  "title": "Fix Mantra dropdown initialization and add diagnostics UI for data freshness",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Ensure Samaveda mantra numbers dropdown reflects backend data (including Mantra 48) and selection deep-links to /samaveda/48.",
+      "summary": "Ensure Samaveda is the default Veda on first load (no deep link) and allow Mantra Number dropdown to populate immediately after fetch, without requiring manual Veda selection.",
       "acceptanceCriteria": [
-        "When Veda = Samaveda, the Mantra Number dropdown includes an option labeled \"Mantra 48\".",
-        "Selecting \"Mantra 48\" updates the URL to /samaveda/48 and loads the corresponding content if available.",
-        "If the backend contains Samaveda mantra 48, the backend getMantraNumbers(Samaveda) response includes 48."
+        "On a fresh load with no deep-link URL, the Veda selection defaults to Samaveda and the Mantra Number dropdown is enabled once numbers finish loading.",
+        "For Samaveda, the Mantra Number dropdown shows at least Mantra 47 and Mantra 48 (based on the current backend data).",
+        "Changing the selected Veda still resets the selected mantra as it does today, without leaving the mantra dropdown permanently disabled."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Adjust the mantra numbers query to use the backend capability that returns the complete set of available mantra numbers for a Veda (so Samaveda includes 48 when present), while preserving numeric sort + de-duplication. Verify the component's usage instructions before implementing."
-        },
-        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Ensure the Mantra Number dropdown renders all returned numbers (including 48) and that selecting a number reliably syncs the URL to the canonical /<veda-slug>/<number> path (e.g., /samaveda/48). Keep user-facing messaging in English. Verify the component's usage instructions before implementing."
+          "description": "Update initial selection logic so when there is no deep link the app starts with selectedVedaString set to Samaveda (instead of empty), allowing useMantraNumbers to fetch immediately and the Mantra Number Select to become usable as soon as loading completes; ensure Veda changes still clear selectedMantraString and that the mantra dropdown enable/disable logic no longer depends on a manual Veda selection. Use existing shadcn-ui Select/Card/Label components to keep UI consistent (Verify the component's usage instructions before implementing)."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Add a production-visible Add button near mantra selection that opens the mantra submission template/form on demand.",
+      "summary": "Add clear inline loading/error/empty states for the Mantra Number dropdown area when fetching mantra numbers.",
       "acceptanceCriteria": [
-        "An \"Add\" button is visible in production builds (not only in development) and is discoverable near the mantra selection area.",
-        "Clicking \"Add\" opens the mantra content template/form (it is not shown until the user clicks \"Add\").",
-        "Closing the template/form returns the user to the main view without changing the current mantra selection."
+        "When mantra numbers are loading, the Mantra Number control shows a loading state (not an empty dropdown).",
+        "If fetching mantra numbers fails, the UI shows an error message in the selection card (not only in the console).",
+        "If fetching succeeds but returns an empty list, the UI shows an explicit empty-state message (e.g., “No mantras available for this Veda.”) instead of an empty dropdown list."
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add a clearly visible \"Add\" button near the selection controls and wire it to open/close the mantra submission template without changing the current Veda/mantra selection. Remove/relax the current production gating so this workflow is available in production builds. Use the shadcn-ui Button component for consistent styling; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/MantraContentTemplate.tsx",
-          "operation": "modify",
-          "description": "Refactor the template UI to support being opened/closed by the parent (App) and to start closed by default; keep Close behavior returning to the main view without side effects. Ensure all user-facing text remains English. Use shadcn-ui Card/Button/Alert/Textarea components as already present; verify the component's usage instructions before implementing."
+          "description": "In the Mantra Number selection section, render an explicit inline state based on useMantraNumbers: (a) show a loading indicator/text while isLoadingNumbers is true, (b) show a user-facing English error line when numbersError is present with an actionable suggestion to refresh/reload, and (c) show an empty-state message when loading is complete and sortedMantraNumbers is empty; avoid showing an empty dropdown list as the only signal. Compose existing shadcn-ui Alert/Skeleton components as needed (Verify the component's usage instructions before implementing)."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "After successful template submission for a new mantra number, refresh the mantra numbers list so the new number is immediately selectable.",
+      "summary": "Expose backend diagnostics in the UI via a small, non-intrusive Diagnostics section visible without authentication, including graceful failure display.",
       "acceptanceCriteria": [
-        "Submitting the template successfully triggers a refresh of the mantra numbers list for the currently selected Veda.",
-        "After successful submission for a new mantra number (e.g., 48), that number appears in the Mantra Number dropdown without requiring a hard refresh.",
-        "All validation and error messages shown to the user during submission are in English."
+        "Backend exposes a new query method that returns diagnostics sufficient to confirm that Samaveda mantras 47 and 48 are present (true/false) and includes basic counts.",
+        "Frontend displays the returned diagnostics data somewhere on the main page (collapsed panel or small card) without requiring login.",
+        "If the diagnostics query fails, the frontend shows a simple English error line in the diagnostics area."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Ensure the template submission mutation triggers a post-submit refresh of the mantra numbers query for the relevant Veda (and any other dependent cached queries) so new mantra numbers become selectable immediately. Keep errors surfaced to the UI in English. Verify the component's usage instructions before implementing."
+          "description": "Add a new React Query hook (e.g., useBackendDiagnostics) that calls the existing backend capability getBackendDiagnostics, returning Diagnostics data plus loading/error state suitable for a small diagnostics UI."
         },
         {
-          "path": "frontend/src/components/MantraContentTemplate.tsx",
-          "operation": "modify",
-          "description": "On successful submission, ensure the UI clearly indicates success in English and closes/returns control without changing the current selection, while relying on query invalidation to refresh the dropdown. Verify the component's usage instructions before implementing."
+          "path": "frontend/src/components/DiagnosticsPanel.tsx",
+          "operation": "create",
+          "description": "Create a small, non-intrusive Diagnostics panel component that uses the new diagnostics hook to show counts and boolean indicators for Samaveda 47/48 existence; include inline loading and a simple English error line if the query fails. Compose existing shadcn-ui Card/Alert components (and/or native HTML details/summary for collapse) rather than modifying anything under frontend/src/components/ui (Verify the component's usage instructions before implementing)."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire the post-submit refresh behavior into the selection experience by ensuring the dropdown list updates immediately when the underlying query refreshes, without requiring a full page reload. Verify the component's usage instructions before implementing."
+          "description": "Wire DiagnosticsPanel into the main page layout (e.g., under the selection Card or near the bottom of the main content) and ensure it renders for anonymous users without adding authentication requirements. Use existing shadcn-ui layout primitives already in use in App (Verify the component's usage instructions before implementing)."
         }
       ]
     }
