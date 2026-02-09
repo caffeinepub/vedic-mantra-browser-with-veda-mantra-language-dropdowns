@@ -1,38 +1,85 @@
 {
   "kind": "build_request",
-  "title": "Move Audio section to render directly below Mantra text (above Meaning)",
+  "title": "Fix mantra number dropdown not showing selected value and ensure options load correctly",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-49",
-      "text": "Update the single-page UI layout so that when the Audio section is shown (currently only for Veda = Samaveda and Mantra Number = 47), it renders directly below the Mantra Text section (i.e., after the mantra text content card) and before the Meaning section, instead of rendering below the Meaning card. Preserve all existing Audio section behavior (upload, playback, loading/error/empty states) and keep all existing user-facing text in English.",
+      "id": "REQ-1",
+      "text": "Fix the Veda and Language Select controls so they use string values (not Motoko variant objects) for their controlled `value` and `SelectItem value`, and reliably map those strings to the backend `Veda` / `Language` enums before calling query hooks (so `useMantraNumbers` consistently loads options).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "recent-messages-3"
         ],
         "quotes": [
-          "Audio should be displayed below the mantra but now it shows below the meaning"
+          "Still it is not showing"
         ]
       },
       "acceptanceCriteria": [
-        "When selecting Veda = Samaveda and Mantra Number = 47, the Audio card appears visually below the Mantra Text card and above the Meaning card.",
-        "When selecting any other (Veda, Mantra Number) combination, the Audio section is not rendered (same behavior as today).",
-        "No existing audio functionality regresses: audio fetch/playback still works when audio exists; upload/replace still works; loading/error/empty states render as before."
+        "Changing Veda updates the mantra numbers list (e.g., Samaveda shows mantra 47 from the current dataset) without React console errors.",
+        "`useMantraNumbers(selectedVeda)` is invoked with a valid backend `Veda` value (not a string or '[object Object]').",
+        "The Veda dropdown trigger always shows the currently selected Veda label after selection."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Ensure the Mantra Number dropdown trigger visibly displays the selected mantra number after auto-selection and manual selection, even if the underlying Select component would otherwise render a blank trigger due to a controlled-value mismatch.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages-3"
+        ],
+        "quotes": [
+          "Still it is not showing"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After the app auto-selects the first available mantra number for a Veda, the Mantra Number Select trigger displays that number (not blank).",
+        "After manually selecting a mantra number from the list, the Mantra Number Select trigger displays the selected number.",
+        "Deep-linking to `/<veda-slug>/<number>` results in the trigger showing that mantra number when it exists in the fetched list; otherwise it falls back to the first available mantra number and shows it."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add lightweight, user-visible debugging guardrails in the mantra selection area (English text only) that render when mantra numbers are not available or when the selected mantra value does not match any loaded options, to make the failure mode obvious in deployed builds.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "recent-messages-3"
+        ],
+        "quotes": [
+          "Still it is not showing"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When mantra numbers fail to load or are empty, the UI shows an English diagnostic message that includes: current Veda, whether numbers are loading, and the count of loaded mantra numbers.",
+        "When a selected mantra value is not present in `uniqueSortedMantraNumbers`, the UI shows an English diagnostic message indicating the mismatch and the current selected value.",
+        "No diagnostic UI is shown during normal operation when mantra numbers are loaded and the selected value is valid."
       ]
     }
   ],
   "constraints": [
-    "Frontend files listed as immutable in SYSTEM_CONTEXT must not be modified.",
-    "Keep all user-facing text in English."
+    "Do not edit files under `frontend/src/components/ui` (compose them only).",
+    "Do not edit immutable hook files: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`.",
+    "Keep all user-facing diagnostic and UI text in English."
   ],
   "nonGoals": [
-    "Do not change backend audio storage APIs or data models.",
-    "Do not change which mantras/vedas show the Audio section (still only Samaveda mantra 47 unless separately requested).",
-    "Do not redesign the Audio component UI beyond what is necessary to move its placement in the page."
+    "Adding new backend mantra content beyond what already exists (e.g., more mantras than the current Samaveda 47 seed).",
+    "Adding new features like shareable links (not requested in the latest message).",
+    "Introducing any third-party analytics or logging services."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

@@ -1,61 +1,53 @@
-import { useState, useRef } from 'react';
-import { Veda } from '../backend';
+import { useState } from 'react';
+import { Veda, ExternalBlob } from '../backend';
 import { useMantraAudio, useUploadMantraAudio } from '../hooks/useQueries';
-import { ExternalBlob } from '../backend';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Upload, Music, AlertCircle, Loader2 } from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { Music, Upload, AlertCircle, Loader2, LogIn } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface MantraAudioSectionProps {
   veda: Veda;
-  mantraNumber: number;
+  mantraNumber: bigint;
 }
 
-/**
- * Audio section component for manual upload and playback of mantra audio files.
- * Shows an HTML audio player when audio is available, or an empty state with upload controls.
- */
 export function MantraAudioSection({ veda, mantraNumber }: MantraAudioSectionProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+
+  // Get authentication state
+  const { identity, login, isLoggingIn } = useInternetIdentity();
+  const isAuthenticated = identity && !identity.getPrincipal().isAnonymous();
 
   // Fetch existing audio
-  const {
-    data: audioBlob,
-    isLoading: isFetchingAudio,
-    error: fetchError,
-  } = useMantraAudio(veda, mantraNumber);
+  const { data: audioBlob, isFetching: isFetchingAudio, error: audioError } = useMantraAudio(veda, mantraNumber);
 
   // Upload mutation
   const uploadMutation = useUploadMantraAudio();
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('audio/')) {
-        alert('Please select a valid audio file.');
-        return;
-      }
-      setSelectedFile(file);
-    }
-  };
+    if (!file) return;
 
-  const handleUpload = async () => {
-    if (!selectedFile) return;
+    // Validate file type
+    if (!file.type.startsWith('audio/')) {
+      toast.error('Please select a valid audio file');
+      return;
+    }
 
     try {
-      // Convert File to Uint8Array
-      const arrayBuffer = await selectedFile.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
+      setIsUploading(true);
+      setUploadProgress(0);
 
-      // Create ExternalBlob with upload progress tracking
-      const blob = ExternalBlob.fromBytes(bytes).withUploadProgress((percentage) => {
+      // Read file as ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+
+      // Create ExternalBlob with progress tracking
+      const blob = ExternalBlob.fromBytes(uint8Array).withUploadProgress((percentage) => {
         setUploadProgress(percentage);
       });
 
@@ -66,33 +58,32 @@ export function MantraAudioSection({ veda, mantraNumber }: MantraAudioSectionPro
         audioBlob: blob,
       });
 
-      // Reset state after successful upload
-      setSelectedFile(null);
+      toast.success('Audio uploaded successfully');
       setUploadProgress(0);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     } catch (error) {
       console.error('Upload error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to upload audio');
+      setUploadProgress(0);
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      event.target.value = '';
     }
   };
 
-  const audioUrl = audioBlob ? audioBlob.getDirectURL() : null;
-
   return (
-    <Card className="shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
+    <Card className="mb-8 shadow-lg border-border/50 bg-card/80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-xl flex items-center gap-2">
           <Music className="h-5 w-5 text-primary" />
           Audio
         </CardTitle>
         <CardDescription>
-          Listen to the mantra recitation or upload your own audio
+          Listen to or upload audio for this mantra
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Fetch Error */}
-        {fetchError && (
+      <CardContent>
+        {audioError && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -101,120 +92,100 @@ export function MantraAudioSection({ veda, mantraNumber }: MantraAudioSectionPro
           </Alert>
         )}
 
-        {/* Upload Error */}
-        {uploadMutation.isError && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {uploadMutation.error instanceof Error
-                ? uploadMutation.error.message
-                : 'Failed to upload audio. Please try again.'}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Loading State */}
+        {/* Loading state */}
         {isFetchingAudio && (
           <div className="space-y-3">
             <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-10 w-32" />
           </div>
         )}
 
-        {/* Audio Player - Show when audio exists */}
-        {!isFetchingAudio && audioUrl && (
+        {/* Audio player and upload controls */}
+        {!isFetchingAudio && !audioError && (
           <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-muted/50 border border-border">
-              <audio
-                controls
-                className="w-full"
-                src={audioUrl}
-                preload="metadata"
-              >
-                Your browser does not support the audio element.
-              </audio>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Audio is available for this mantra. You can replace it by uploading a new file below.
-            </p>
-          </div>
-        )}
-
-        {/* Empty State - Show when no audio exists */}
-        {!isFetchingAudio && !audioUrl && !fetchError && (
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              No audio is available for Samaveda, Mantra {mantraNumber}.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Upload Section */}
-        {!isFetchingAudio && (
-          <div className="space-y-4 pt-4 border-t border-border/50">
-            <div className="space-y-2">
-              <Label htmlFor="audio-file" className="text-sm font-medium">
-                {audioUrl ? 'Replace Audio File' : 'Upload Audio File'}
-              </Label>
-              <div className="flex gap-2">
-                <Input
-                  ref={fileInputRef}
-                  id="audio-file"
-                  type="file"
-                  accept="audio/*,.mp3,.wav,.ogg,.m4a"
-                  onChange={handleFileSelect}
-                  disabled={uploadMutation.isPending}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={handleUpload}
-                  disabled={!selectedFile || uploadMutation.isPending}
-                  className="min-w-[120px]"
+            {/* Existing audio player */}
+            {audioBlob ? (
+              <div className="space-y-2">
+                <audio
+                  controls
+                  className="w-full"
+                  src={audioBlob.getDirectURL()}
+                  preload="metadata"
                 >
-                  {uploadMutation.isPending ? (
+                  Your browser does not support the audio element.
+                </audio>
+                {isAuthenticated && (
+                  <p className="text-xs text-muted-foreground">
+                    Upload a new file to replace the existing audio
+                  </p>
+                )}
+              </div>
+            ) : (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  No audio is available for this mantra yet.
+                  {isAuthenticated ? ' Upload an audio file below.' : ' Log in to upload audio.'}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Upload controls - only show if authenticated */}
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  disabled={isUploading}
+                  onClick={() => document.getElementById('audio-file-input')?.click()}
+                  className="relative"
+                >
+                  {isUploading ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Uploading...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading... {uploadProgress}%
                     </>
                   ) : (
                     <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload
+                      <Upload className="mr-2 h-4 w-4" />
+                      {audioBlob ? 'Replace Audio' : 'Upload Audio'}
                     </>
                   )}
                 </Button>
+                <input
+                  id="audio-file-input"
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+                {isUploading && uploadProgress > 0 && (
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                )}
               </div>
-              {selectedFile && (
-                <p className="text-sm text-muted-foreground">
-                  Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                </p>
-              )}
-            </div>
-
-            {/* Upload Progress */}
-            {uploadMutation.isPending && uploadProgress > 0 && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>Uploading...</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-primary h-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Success Message */}
-            {uploadMutation.isSuccess && (
-              <Alert className="bg-success/10 border-success/20">
-                <AlertDescription className="text-success-foreground">
-                  Audio uploaded successfully!
-                </AlertDescription>
-              </Alert>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={login}
+                disabled={isLoggingIn}
+              >
+                {isLoggingIn ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Logging in...
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Log in to Upload Audio
+                  </>
+                )}
+              </Button>
             )}
           </div>
         )}

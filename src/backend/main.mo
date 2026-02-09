@@ -1,12 +1,11 @@
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
+import Iter "mo:core/Iter";
 import Array "mo:core/Array";
 import Order "mo:core/Order";
-import Iter "mo:core/Iter";
+
 import Storage "blob-storage/Storage";
 import MixinStorage "blob-storage/Mixin";
-
-
 
 actor {
   include MixinStorage();
@@ -37,8 +36,8 @@ actor {
 
   type MantraMetadata = {
     telugu : Text;
-    english : Text;
     hindi : Text;
+    english : Text;
   };
 
   type Mantra = {
@@ -48,7 +47,22 @@ actor {
 
   module Mantra {
     public func compare(x : Mantra, y : Mantra) : Order.Order {
-      Nat.compare(x.mantraNumber, y.mantraNumber);
+      switch (Nat.compare(x.mantraNumber, y.mantraNumber)) {
+        case (#equal) {
+          switch (x.veda, y.veda) {
+            case (#rikVeda, #rikVeda) { #equal };
+            case (#rikVeda, _) { #less };
+            case (#yajurVeda, #rikVeda) { #greater };
+            case (#yajurVeda, #yajurVeda) { #equal };
+            case (#yajurVeda, _) { #less };
+            case (#samaVeda, #atharvaVeda) { #less };
+            case (#samaVeda, #samaVeda) { #equal };
+            case (#atharvaVeda, #atharvaVeda) { #equal };
+            case (_) { #greater };
+          };
+        };
+        case (other) { other };
+      };
     };
   };
 
@@ -90,11 +104,7 @@ actor {
   let mantraAudioFiles = Map.empty<Mantra, Storage.ExternalBlob>();
 
   public query ({ caller }) func getMantraNumbers(veda : Veda) : async [Nat] {
-    mantras
-      .keys()
-      .toArray()
-      .filter(func(entry) { entry.veda == veda })
-      .map(func(mantra) { mantra.mantraNumber });
+    mantras.keys().toArray().filter(func(entry) { entry.veda == veda }).map(func(mantra) { mantra.mantraNumber });
   };
 
   public query ({ caller }) func getMantraMeaning(

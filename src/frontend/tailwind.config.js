@@ -86,8 +86,6 @@ export default {
                     ring: 'oklch(var(--sidebar-ring))'
                 },
                 metadata: {
-                    bg: 'oklch(var(--metadata-bg))',
-                    border: 'oklch(var(--metadata-border))',
                     label: 'oklch(var(--metadata-label))'
                 }
             },

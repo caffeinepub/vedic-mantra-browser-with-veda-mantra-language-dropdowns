@@ -1,18 +1,42 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-09T03:12:10.925Z",
+  "generatedAt": "2026-02-09T04:13:53.586Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-49",
-        "summary": "Update the single-page UI layout so that when the Audio section is shown (currently only for Veda = Samaveda and Mantra Number = 47), it renders directly below the Mantra Text section (i.e., after the mantra text content card) and before the Meaning section, instead of rendering below the Meaning card. Preserve all existing Audio section behavior (upload, playback, loading/error/empty states) and keep all existing user-facing text in English.",
+        "id": "REQ-1",
+        "summary": "Fix the Veda and Language Select controls so they use string values (not Motoko variant objects) for their controlled `value` and `SelectItem value`, and reliably map those strings to the backend `Veda` / `Language` enums before calling query hooks (so `useMantraNumbers` consistently loads options).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/utils/selectValueGuards.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Ensure the Mantra Number dropdown trigger visibly displays the selected mantra number after auto-selection and manual selection, even if the underlying Select component would otherwise render a blank trigger due to a controlled-value mismatch.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
+          "frontend/src/utils/selectValueGuards.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Add lightweight, user-visible debugging guardrails in the mantra selection area (English text only) that render when mantra numbers are not available or when the selected mantra value does not match any loaded options, to make the failure mode obvious in deployed builds.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/App.tsx"

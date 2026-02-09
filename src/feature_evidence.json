@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-single-page-ui-layout-so-that-when-the-audio-section-is-shown-currently-only-for-veda-samaveda-and-mantra-number-47-it-renders-directly-below-the-mantra-text-section-i-e-after-the-mantra-text-content-card-and-before-the-meaning-section-instead-of-rendering-below-the-meaning-card-preserve-all-existing-audio-section-behavior-upload-playback-loading-error-empty-states-and-keep-all-existing-user-facing-text-in-english",
-      "featureTitle": "Update the single-page UI layout so that when the Audio section is shown (currently only for Veda = Samaveda and Mantra Number = 47), it renders directly below the Mantra Text section (i.e., after the mantra text content card) and before the Meaning section, instead of rendering below the Meaning card. Preserve all existing Audio section behavior (upload, playback, loading/error/empty states) and keep all existing user-facing text in English.",
+      "featureId": "feature-fix-the-veda-and-language-select-controls-so-they-use-string-values-not-motoko-variant-objects-for-their-controlled-value-and-selectitem-value-and-reliably-map-those-strings-to-the-backend-veda-language-enums-before-calling-query-hooks-so-usemantranumbers-consistently-loads-options",
+      "featureTitle": "Fix the Veda and Language Select controls so they use string values (not Motoko variant objects) for their controlled `value` and `SelectItem value`, and reliably map those strings to the backend `Veda` / `Language` enums before calling query hooks (so `useMantraNumbers` consistently loads options).",
       "files": [
         "frontend/src/App.tsx"
       ],
@@ -16,7 +16,45 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-49"
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-mantra-number-dropdown-trigger-visibly-displays-the-selected-mantra-number-after-auto-selection-and-manual-selection-even-if-the-underlying-select-component-would-otherwise-render-a-blank-trigger-due-to-a-controlled-value-mismatch",
+      "featureTitle": "Ensure the Mantra Number dropdown trigger visibly displays the selected mantra number after auto-selection and manual selection, even if the underlying Select component would otherwise render a blank trigger due to a controlled-value mismatch.",
+      "files": [
+        "frontend/src/App.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-lightweight-user-visible-debugging-guardrails-in-the-mantra-selection-area-english-text-only-that-render-when-mantra-numbers-are-not-available-or-when-the-selected-mantra-value-does-not-match-any-loaded-options-to-make-the-failure-mode-obvious-in-deployed-builds",
+      "featureTitle": "Add lightweight, user-visible debugging guardrails in the mantra selection area (English text only) that render when mantra numbers are not available or when the selected mantra value does not match any loaded options, to make the failure mode obvious in deployed builds.",
+      "files": [
+        "frontend/src/App.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
       ],
       "confidence": "high"
     }

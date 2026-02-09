@@ -1,21 +1,63 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Reorder Audio section to appear between Mantra Text and Meaning",
+  "title": "Fix controlled Select value mismatches for Veda/Language/Mantra selection",
   "requirements": [
     {
-      "id": "REQ-49",
-      "summary": "Move the conditional Audio section so it renders directly below the Mantra Text card and above the Meaning card, without changing when it appears or any audio behavior/text.",
+      "id": "REQ-1",
+      "summary": "Make Veda and Language Select controls fully string-controlled and map strings to backend enums before invoking mantra-number queries.",
       "acceptanceCriteria": [
-        "When selecting Veda = Samaveda and Mantra Number = 47, the Audio card appears visually below the Mantra Text card and above the Meaning card.",
-        "When selecting any other (Veda, Mantra Number) combination, the Audio section is not rendered (same behavior as today).",
-        "No existing audio functionality regresses: audio fetch/playback still works when audio exists; upload/replace still works; loading/error/empty states render as before."
+        "Changing Veda updates the mantra numbers list (e.g., Samaveda shows mantra 47 from the current dataset) without React console errors.",
+        "`useMantraNumbers(selectedVeda)` is invoked with a valid backend `Veda` value (not a string or '[object Object]').",
+        "The Veda dropdown trigger always shows the currently selected Veda label after selection."
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Reorder the JSX in the single-page layout to render <MantraAudioSection> (still gated by the existing shouldShowAudio condition: Samaveda + mantra 47) immediately after the Mantra Text card and before the Meaning card; keep all user-facing text unchanged (English). Ensure the moved section still uses the existing blob-storage ExternalBlob-based behavior via MantraAudioSection (direct URL playback + upload progress), and that no loading/error/empty states change. Verify the component's usage instructions before implementing."
+          "description": "Refactor Veda and Language selection state to be string-controlled (Select `value` and `SelectItem value` as strings), add explicit string<->enum mapping/validation (with safe fallback), and ensure hooks are called with validated backend `Veda`/`Language` enums. Use the shadcn-ui Select component composition patterns (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/selectValueGuards.ts",
+          "operation": "modify",
+          "description": "Add small helper(s) to validate/normalize string-controlled Select values against allowed option sets (e.g., safe string selection with fallback) so App can reliably map strings to backend enums before queries."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Ensure Mantra Number Select trigger always displays the selected mantra number for auto-selection, manual selection, and deep links.",
+      "acceptanceCriteria": [
+        "After the app auto-selects the first available mantra number for a Veda, the Mantra Number Select trigger displays that number (not blank).",
+        "After manually selecting a mantra number from the list, the Mantra Number Select trigger displays the selected number.",
+        "Deep-linking to `/<veda-slug>/<number>` results in the trigger showing that mantra number when it exists in the fetched list; otherwise it falls back to the first available mantra number and shows it."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Make Mantra Number Select consistently string-controlled (store and pass a string value that exactly matches SelectItem values), synchronize bigint<->string conversions in auto-select and deep-link flows, and ensure the trigger never renders blank due to mismatched controlled values. Use the shadcn-ui Select component composition patterns (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/utils/selectValueGuards.ts",
+          "operation": "modify",
+          "description": "Extend guards/utilities so App can (a) detect when the currently selected mantra string does not exist in the loaded options and (b) compute a safe displayed Select value (prefer selected if valid, otherwise fall back to first available) to prevent blank triggers."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add English diagnostic UI in the selection area when mantra numbers are empty or when the selected mantra value does not match loaded options.",
+      "acceptanceCriteria": [
+        "When mantra numbers fail to load or are empty, the UI shows an English diagnostic message that includes: current Veda, whether numbers are loading, and the count of loaded mantra numbers.",
+        "When a selected mantra value is not present in `uniqueSortedMantraNumbers`, the UI shows an English diagnostic message indicating the mismatch and the current selected value.",
+        "No diagnostic UI is shown during normal operation when mantra numbers are loaded and the selected value is valid."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "In the mantra selection card (near the Mantra Number control), render lightweight English-only guardrail messages (e.g., using the existing Alert component) when numbers are empty/failed or when the selected mantra value is not found in the loaded options; ensure diagnostics are hidden during normal valid operation. Use existing shadcn-ui Alert composition (do not edit files under frontend/src/components/ui). Verify the component's usage instructions before implementing."
         }
       ]
     }

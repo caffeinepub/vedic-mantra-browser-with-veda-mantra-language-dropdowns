@@ -1,10 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Move the Audio section to appear directly below the Mantra Text and above the Meaning when it is rendered.
+**Goal:** Fix the Veda/Language and Mantra Number dropdowns so options load reliably and the selected values always display correctly.
 
 **Planned changes:**
-- Update the single-page UI layout so the Audio card (when shown for Samaveda, Mantra 47) renders immediately after the Mantra Text content card and before the Meaning card.
-- Keep the Audio section’s existing behavior unchanged (upload/replace, playback, and loading/error/empty states), and keep all user-facing text in English.
+- Update the Veda and Language Select controls to use string `value`s for controlled state and `SelectItem value`, and map those strings back to backend `Veda`/`Language` enums before invoking query hooks (so `useMantraNumbers` receives a valid backend enum value).
+- Fix the Mantra Number Select controlled value handling so the trigger always shows the selected mantra number after auto-select, manual selection, and deep-linked routes.
+- Add lightweight English diagnostic UI in the mantra selection area that appears only when mantra numbers are empty/unavailable or when the selected mantra value does not match any loaded option (showing current Veda, loading state, count, and/or mismatch details).
 
-**User-visible outcome:** When viewing Samaveda Mantra 47, the Audio section appears right below the mantra text and above the meaning; for all other selections, the Audio section remains hidden as it is today.
+**User-visible outcome:** Changing Veda reliably refreshes the mantra numbers list, the dropdown triggers always display the current selections (including deep links), and clear English diagnostic messages appear only when the numbers fail to load or a selection mismatch occurs.

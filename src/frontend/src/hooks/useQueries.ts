@@ -8,14 +8,32 @@ import { Veda, Language, ExternalBlob } from '../backend';
 export function useMantraNumbers(veda: Veda) {
   const { actor, isFetching: isActorFetching } = useActor();
 
-  return useQuery<number[]>({
+  return useQuery<bigint[]>({
     queryKey: ['mantraNumbers', veda],
     queryFn: async () => {
       if (!actor) return [];
       const numbers = await actor.getMantraNumbers(veda);
-      // Convert BigInt to number, deduplicate, and sort ascending
-      const uniqueNumbers = Array.from(new Set(numbers.map(n => Number(n))));
-      return uniqueNumbers.sort((a, b) => a - b);
+      
+      // Sort ascending numerically
+      const sorted = numbers.sort((a, b) => {
+        if (a < b) return -1;
+        if (a > b) return 1;
+        return 0;
+      });
+      
+      // De-duplicate: filter out any duplicate bigint values
+      const unique: bigint[] = [];
+      const seen = new Set<string>();
+      
+      for (const num of sorted) {
+        const key = num.toString();
+        if (!seen.has(key)) {
+          seen.add(key);
+          unique.push(num);
+        }
+      }
+      
+      return unique;
     },
     enabled: !!actor && !isActorFetching,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
@@ -25,18 +43,18 @@ export function useMantraNumbers(veda: Veda) {
 /**
  * Hook to fetch mantra meaning for a given Veda, mantra number, and language
  */
-export function useMantraMeaning(veda: Veda, mantraNumber: number, language: Language) {
+export function useMantraMeaning(veda: Veda, mantraNumber: bigint, language: Language) {
   const { actor, isFetching: isActorFetching } = useActor();
 
   return useQuery<string | null>({
-    queryKey: ['mantraMeaning', veda, mantraNumber, language],
+    queryKey: ['mantraMeaning', veda, mantraNumber.toString(), language],
     queryFn: async () => {
       if (!actor) return null;
-      const result = await actor.getMantraMeaning(veda, BigInt(mantraNumber), language);
+      const result = await actor.getMantraMeaning(veda, mantraNumber, language);
       // Ensure we return null for empty/undefined results
       return result || null;
     },
-    enabled: !!actor && !isActorFetching && mantraNumber > 0,
+    enabled: !!actor && !isActorFetching && mantraNumber > 0n,
     staleTime: 0, // Always fetch fresh data to avoid stale content
     gcTime: 0, // Don't keep data in cache after component unmounts
     placeholderData: undefined, // Never show previous data when query key changes
@@ -46,18 +64,18 @@ export function useMantraMeaning(veda: Veda, mantraNumber: number, language: Lan
 /**
  * Hook to fetch mantra text (translation) for a given Veda, mantra number, and language
  */
-export function useMantraText(veda: Veda, mantraNumber: number, language: Language) {
+export function useMantraText(veda: Veda, mantraNumber: bigint, language: Language) {
   const { actor, isFetching: isActorFetching } = useActor();
 
   return useQuery<string | null>({
-    queryKey: ['mantraText', veda, mantraNumber, language],
+    queryKey: ['mantraText', veda, mantraNumber.toString(), language],
     queryFn: async () => {
       if (!actor) return null;
-      const result = await actor.getMantraText(veda, BigInt(mantraNumber), language);
+      const result = await actor.getMantraText(veda, mantraNumber, language);
       // Ensure we return null for empty/undefined results
       return result || null;
     },
-    enabled: !!actor && !isActorFetching && mantraNumber > 0,
+    enabled: !!actor && !isActorFetching && mantraNumber > 0n,
     staleTime: 0, // Always fetch fresh data to avoid stale content
     gcTime: 0, // Don't keep data in cache after component unmounts
     placeholderData: undefined, // Never show previous data when query key changes
@@ -67,18 +85,18 @@ export function useMantraText(veda: Veda, mantraNumber: number, language: Langua
 /**
  * Hook to fetch mantra metadata/header for a given Veda, mantra number, and language
  */
-export function useMantraMetadata(veda: Veda, mantraNumber: number, language: Language) {
+export function useMantraMetadata(veda: Veda, mantraNumber: bigint, language: Language) {
   const { actor, isFetching: isActorFetching } = useActor();
 
   return useQuery<string | null>({
-    queryKey: ['mantraMetadata', veda, mantraNumber, language],
+    queryKey: ['mantraMetadata', veda, mantraNumber.toString(), language],
     queryFn: async () => {
       if (!actor) return null;
-      const result = await actor.getMantraMetadata(veda, BigInt(mantraNumber), language);
+      const result = await actor.getMantraMetadata(veda, mantraNumber, language);
       // Ensure we return null for empty/undefined results
       return result || null;
     },
-    enabled: !!actor && !isActorFetching && mantraNumber > 0,
+    enabled: !!actor && !isActorFetching && mantraNumber > 0n,
     staleTime: 0, // Always fetch fresh data to avoid stale content
     gcTime: 0, // Don't keep data in cache after component unmounts
     placeholderData: undefined, // Never show previous data when query key changes
@@ -88,17 +106,17 @@ export function useMantraMetadata(veda: Veda, mantraNumber: number, language: La
 /**
  * Hook to fetch mantra audio file for a given Veda and mantra number
  */
-export function useMantraAudio(veda: Veda, mantraNumber: number) {
+export function useMantraAudio(veda: Veda, mantraNumber: bigint) {
   const { actor, isFetching: isActorFetching } = useActor();
 
   return useQuery<ExternalBlob | null>({
-    queryKey: ['mantraAudio', veda, mantraNumber],
+    queryKey: ['mantraAudio', veda, mantraNumber.toString()],
     queryFn: async () => {
       if (!actor) return null;
-      const result = await actor.getMantraAudioFile(veda, BigInt(mantraNumber));
+      const result = await actor.getMantraAudioFile(veda, mantraNumber);
       return result || null;
     },
-    enabled: !!actor && !isActorFetching && mantraNumber > 0,
+    enabled: !!actor && !isActorFetching && mantraNumber > 0n,
     staleTime: 0,
     gcTime: 0,
     placeholderData: undefined,
@@ -119,18 +137,18 @@ export function useUploadMantraAudio() {
       audioBlob,
     }: {
       veda: Veda;
-      mantraNumber: number;
+      mantraNumber: bigint;
       audioBlob: ExternalBlob;
     }) => {
       if (!actor) {
         throw new Error('Backend actor is not available. Please try again.');
       }
-      await actor.addMantraAudioFile(veda, BigInt(mantraNumber), audioBlob);
+      await actor.addMantraAudioFile(veda, mantraNumber, audioBlob);
     },
     onSuccess: (_, variables) => {
       // Invalidate the audio query to refetch the newly uploaded audio
       queryClient.invalidateQueries({
-        queryKey: ['mantraAudio', variables.veda, variables.mantraNumber],
+        queryKey: ['mantraAudio', variables.veda, variables.mantraNumber.toString()],
       });
     },
     onError: (error: Error) => {
